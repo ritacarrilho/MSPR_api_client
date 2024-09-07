@@ -8,21 +8,6 @@
 ## Technologie 
 - Api en [FastApi](https://fastapi.tiangolo.com/)
 
-## Endpoints de l'API
-
-## Docker
-
-1) Build container : ```docker-compose build```
-
-2) Start container : ```docker-compose up```
-
-
-## Commandes utiles
-### Effacer fichiers DS_Store
-```java
-find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
-```
-
 ## Base de données
 - [MySQL](https://www.mysql.com/fr/)
 
@@ -90,3 +75,17 @@ id (INT, clé primaire) : Identifiant unique de la commande.
 customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
 
 created_at (DATETIME) : Date de création de la commande.
+
+## Endpoints de l'API
+
+## Docker
+
+1) Build container : ```docker-compose build```
+
+2) Start container : ```docker-compose up```
+
+## Commandes utiles
+### Effacer fichiers DS_Store
+```java
+find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
+```
