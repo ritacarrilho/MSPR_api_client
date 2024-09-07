@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  kawa-clients-db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: clients
+      POSTGRES_PASSWORD: kawaclients
+      POSTGRES_DB: kawaclientsdb
+    ports:
+      - "3252:5432"
+    expose:
+      - "5433" 
+    volumes:
+      - clients-data:/var/lib/postgresql/data
+    networks:
+      - kawa-clients-network
+
+  kawa-clients-app:
+    container_name: kawa_clients
+    build:
+      context: .
+    ports:
+      - "8082:82"
+    depends_on:
+      - kawa-clients-db
+    environment:
+      - DATABASE_URL=postgresql://clients:kawaclients@kawa-clients-db/kawaclientsdb
+    networks:
+      - kawa-clients-network
+
+volumes:
+  clients-data:
+
+networks:
+  kawa-clients-network:
