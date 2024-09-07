@@ -37,7 +37,7 @@ https://615f5fb4f7254d0017068109.mockapi.io/api/v1/customers
 
 #### Table ``customers``
 
-id (INT, clé primaire) : Identifiant unique du client.
+id_customer (INT, clé primaire) : Identifiant unique du client.
 
 created_at (DATETIME) : Date de création du client.
 
@@ -55,9 +55,9 @@ city (VARCHAR) : Ville de l'adresse.
 
 #### Table ``profiles``
 
-id (INT, clé primaire) : Identifiant unique du profil.
+id_profile (INT, clé primaire) : Identifiant unique du profil.
 
-customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
+id_customer (INT, clé étrangère) : Référence à l'identifiant du client.
 
 first_name (VARCHAR) : Prénom du profil.
 
@@ -65,17 +65,17 @@ last_name (VARCHAR) : Nom de famille du profil.
 
 #### Table ``companies``
 
-id (INT, clé primaire) : Identifiant unique de l'entreprise.
+id_company (INT, clé primaire) : Identifiant unique de l'entreprise.
 
-customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
+id_customer (INT, clé étrangère) : Référence à l'identifiant du client.
 
 company_name (VARCHAR) : Nom de l'entreprise.
 
 #### Table ``orders``
 
-id (INT, clé primaire) : Identifiant unique de la commande.
+id_order (INT, clé primaire) : Identifiant unique de la commande.
 
-customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
+id_customer (INT, clé étrangère) : Référence à l'identifiant du client.
 
 created_at (DATETIME) : Date de création de la commande.
 
