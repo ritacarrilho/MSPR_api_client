@@ -31,7 +31,7 @@ find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 ### Base de données 
 - [MySQL](https://www.mysql.com/fr/)
 
-**Nom** : customer_db
+**Nom** : ``customer_db``
 
 ### Modèle conceptuel de données (MCD)
 ![](./assets/BDD_client.png)
