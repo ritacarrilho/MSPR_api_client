@@ -5,10 +5,16 @@ It includes the operations of creation, lecture, update and delete of customers
 
 from typing import List
 from fastapi import FastAPI, HTTPException, Depends
+from sqlalchemy.orm import Session
 
+from .database import engine, get_db
 
-app = FastAPI()
-
+app = FastAPI(
+    title="Api Customer",
+    description=".....",
+    summary=".....",
+    version="0.0.2",
+)
 @app.get("/", response_model=dict, tags=["Health Check"])
 def api_status():
     """
