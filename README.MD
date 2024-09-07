@@ -29,9 +29,9 @@ find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 ## Tables de la base de données
 
 ### Base de données 
-- MySQL 
+- [MySQL](https://www.mysql.com/fr/)
 
-Nom : customer_db
+**Nom** : customer_db
 
 ### Modèle conceptuel de données (MCD)
 ![](./assets/BDD_client.png)
