@@ -10,8 +10,6 @@
 
 ## Endpoints de l'API
 
-
-
 ## Docker
 
 1) Build container : ```docker-compose build```
@@ -27,6 +25,7 @@ find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 
 ## Base de données
 - [MySQL](https://www.mysql.com/fr/)
+
 **Nom BDD** : ``customer_db``
 
 ### Mock initial
