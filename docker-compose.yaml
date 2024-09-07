@@ -1,36 +1,36 @@
 version: "3.8"
 
 services:
-  kawa-clients-db:
-    image: postgres:latest
+  kawa-customers-db:
+    image: mysql:latest
     environment:
-      POSTGRES_USER: clients
-      POSTGRES_PASSWORD: kawaclients
-      POSTGRES_DB: kawaclientsdb
+      MYSQL_USER: customers
+      MYSQL_PASSWORD: kawacustomers
+      MYSQL_DATABASE: kawacustomersdb
     ports:
-      - "3252:5432"
+      - "3252:3306" 
     expose:
-      - "5433" 
+      - "3306"
     volumes:
-      - clients-data:/var/lib/postgresql/data
+      - customers-data:/var/lib/mysql
     networks:
-      - kawa-clients-network
+      - kawa-customers-network
 
-  kawa-clients-app:
-    container_name: kawa_clients
+  kawa-customers-app:
+    container_name: kawa_customers
     build:
       context: .
     ports:
       - "8082:82"
     depends_on:
-      - kawa-clients-db
+      - kawa-customers-db
     environment:
-      - DATABASE_URL=postgresql://clients:kawaclients@kawa-clients-db/kawaclientsdb
+      - DATABASE_URL=mysql://customers:kawacustomers@kawa-customers-db:3306/kawacustomersdb
     networks:
-      - kawa-clients-network
+      - kawa-customers-network
 
 volumes:
-  clients-data:
+  customers-data:
 
 networks:
-  kawa-clients-network:
+  kawa-customers-network:

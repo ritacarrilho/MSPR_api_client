@@ -4,6 +4,7 @@
 - BILLARD Mélissa
 - BRACCIALES-COMBAS Lola
 - CARRILHO LAMEIRA Rita
+- DIAGNE Sokhna
 
 ## Technologie 
 - Api en [FastApi](https://fastapi.tiangolo.com/)
@@ -27,17 +28,14 @@ https://615f5fb4f7254d0017068109.mockapi.io/api/v1/customers
 
 ![](./assets/mock_client.png)
 
-### Modèle Conceptuel de Données (MCD)
+### Modèle conceptuel de données (MCD)
 ![](./assets/BDD_client.png)
-
-#### Modèle Logique de Données (MLD)
-![](./assets/mld.png)
 
 ### Détails tables
 
 #### Table ``customers``
 
-id_customer (INT, clé primaire) : Identifiant unique du client.
+id (INT, clé primaire) : Identifiant unique du client.
 
 created_at (DATETIME) : Date de création du client.
 
@@ -55,9 +53,9 @@ city (VARCHAR) : Ville de l'adresse.
 
 #### Table ``profiles``
 
-id_profile (INT, clé primaire) : Identifiant unique du profil.
+id (INT, clé primaire) : Identifiant unique du profil.
 
-id_customer (INT, clé étrangère) : Référence à l'identifiant du client.
+customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
 
 first_name (VARCHAR) : Prénom du profil.
 
@@ -65,17 +63,17 @@ last_name (VARCHAR) : Nom de famille du profil.
 
 #### Table ``companies``
 
-id_company (INT, clé primaire) : Identifiant unique de l'entreprise.
+id (INT, clé primaire) : Identifiant unique de l'entreprise.
 
-id_customer (INT, clé étrangère) : Référence à l'identifiant du client.
+customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
 
 company_name (VARCHAR) : Nom de l'entreprise.
 
 #### Table ``orders``
 
-id_order (INT, clé primaire) : Identifiant unique de la commande.
+id (INT, clé primaire) : Identifiant unique de la commande.
 
-id_customer (INT, clé étrangère) : Référence à l'identifiant du client.
+customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
 
 created_at (DATETIME) : Date de création de la commande.
 
