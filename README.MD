@@ -25,16 +25,12 @@
 find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 ```
 
-
-## Tables de la base de données
+## Base de données
+- [MySQL](https://www.mysql.com/fr/)
+**Nom BDD** : ``customer_db``
 
 ### Mock initial
 ![](./assets/mock_client.png)
-
-### Base de données 
-- [MySQL](https://www.mysql.com/fr/)
-
-**Nom** : ``customer_db``
 
 ### Modèle conceptuel de données (MCD)
 ![](./assets/BDD_client.png)
