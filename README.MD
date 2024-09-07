@@ -36,9 +36,9 @@ find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 
 ### Détails tables
 
-#### Table customers
+#### Table ``customers``
 
-id (VARCHAR, clé primaire) : Identifiant unique du client.
+id (INT, clé primaire) : Identifiant unique du client.
 
 created_at (DATETIME) : Date de création du client.
 
@@ -54,28 +54,28 @@ postal_code (VARCHAR) : Code postal de l'adresse.
 
 city (VARCHAR) : Ville de l'adresse.
 
-#### Table profiles
+#### Table ``profiles``
 
-id (VARCHAR, clé primaire) : Identifiant unique du profil.
+id (INT, clé primaire) : Identifiant unique du profil.
 
-customer_id (VARCHAR, clé étrangère) : Référence à l'identifiant du client.
+customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
 
 first_name (VARCHAR) : Prénom du profil.
 
 last_name (VARCHAR) : Nom de famille du profil.
 
-#### Table companies
+#### Table ``companies``
 
-id (VARCHAR, clé primaire) : Identifiant unique de l'entreprise.
+id (INT, clé primaire) : Identifiant unique de l'entreprise.
 
-customer_id (VARCHAR, clé étrangère) : Référence à l'identifiant du client.
+customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
 
 company_name (VARCHAR) : Nom de l'entreprise.
 
-#### Table orders
+#### Table ``orders``
 
-id (VARCHAR, clé primaire) : Identifiant unique de la commande.
+id (INT, clé primaire) : Identifiant unique de la commande.
 
-customer_id (VARCHAR, clé étrangère) : Référence à l'identifiant du client.
+customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
 
 created_at (DATETIME) : Date de création de la commande.
