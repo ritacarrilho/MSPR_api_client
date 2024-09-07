@@ -1,6 +1,6 @@
 """
-Module with all the API endpoints for clients management.
-It includes the operations of creation, lecture, update and delete of clients
+Module with all the API endpoints for customers management.
+It includes the operations of creation, lecture, update and delete of customers
 """
 
 from typing import List
@@ -21,11 +21,11 @@ def api_status():
 
 
 
-@app.get("/clients/", tags=["clients"])
-def get_clients():
-    return {"get clients": "ok"}
+@app.get("/customers/", tags=["customers"])
+def get_customers():
+    return {"get customers": "ok"}
 
 
-@app.get("/clients/{id}", tags=["clients"])
-def get_clients():
-    return {"get client by id": "ok"}
+@app.get("/customers/{id}", tags=["customers"])
+def get_customers():
+    return {"get customer by id": "ok"}
