@@ -1,5 +1,7 @@
 import mysql.connector
 from mysql.connector import errorcode
+import json
+import os
 
 # Informations de connexion MySQL
 config = {
@@ -10,6 +12,9 @@ config = {
 
 # Nom de la base de données
 db_name = 'customer_bd'
+
+# Chemin fichier data
+json_file_path = os.path.join('data', 'data.json')
 
 # Connexion à MySQL
 try:
