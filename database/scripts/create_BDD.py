@@ -46,30 +46,30 @@ try:
     create_tables_queries = {
         'Customers': """
             CREATE TABLE Customers (
-                id_customer VARCHAR(50),
+                id_customer INT,
                 created_at DATETIME NOT NULL,
                 name VARCHAR(80) NOT NULL,
                 username VARCHAR(80) NOT NULL,
                 first_name VARCHAR(80) NOT NULL,
-                last_name_ VARCHAR(80) NOT NULL,
-                postal_code_ VARCHAR(10) NOT NULL,
+                last_name VARCHAR(80) NOT NULL,
+                postal_code VARCHAR(10) NOT NULL,
                 city VARCHAR(90) NOT NULL,
                 PRIMARY KEY (id_customer)
             )
         """,
         'Companies': """
             CREATE TABLE companies (
-                id_customer VARCHAR(50),
-                id_company VARCHAR(80),
-                company_name_ VARCHAR(80) NOT NULL,
+                id_customer INT,
+                id_company INT,
+                company_name VARCHAR(80) NOT NULL,
                 PRIMARY KEY (id_customer, id_company),
                 FOREIGN KEY (id_customer) REFERENCES Customers(id_customer)
             )
         """,
         'Orders': """
             CREATE TABLE orders (
-                id_customer VARCHAR(50),
-                id_order VARCHAR(80),
+                id_customer INT,
+                id_order INT,
                 created_at DATETIME NOT NULL,
                 PRIMARY KEY (id_customer, id_order),
                 FOREIGN KEY (id_customer) REFERENCES Customers(id_customer)
@@ -77,10 +77,10 @@ try:
         """,
         'Profiles': """
             CREATE TABLE profiles (
-                id_profile VARCHAR(80),
-                first_name_ VARCHAR(80) NOT NULL,
-                last_name_ VARCHAR(50) NOT NULL,
-                id_customer VARCHAR(50) NOT NULL,
+                id_profile INT,
+                first_name VARCHAR(80) NOT NULL,
+                last_name VARCHAR(50) NOT NULL,
+                id_customer INT NOT NULL,
                 PRIMARY KEY (id_profile),
                 FOREIGN KEY (id_customer) REFERENCES Customers(id_customer)
             )
@@ -103,7 +103,7 @@ try:
         # Insertion des données dans la table Customers
         for customer in data:
             insert_customer = """
-                INSERT INTO Customers (id_customer, created_at, name, username, first_name, last_name_, postal_code_, city)
+                INSERT INTO Customers (id_customer, created_at, name, username, first_name, last_name, postal_code, city)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             cursor.execute(insert_customer, (
@@ -119,7 +119,7 @@ try:
 
             # Insertion des données dans la table Companies
             insert_company = """
-                INSERT INTO companies (id_customer, id_company, company_name_)
+                INSERT INTO companies (id_customer, id_company, company_name)
                 VALUES (%s, %s, %s)
             """
             cursor.execute(insert_company, (
@@ -130,7 +130,7 @@ try:
 
             # Insertion des données dans la table Profiles
             insert_profile = """
-                INSERT INTO profiles (id_profile, first_name_, last_name_, id_customer)
+                INSERT INTO profiles (id_profile, first_name, last_name, id_customer)
                 VALUES (%s, %s, %s, %s)
             """
             cursor.execute(insert_profile, (
