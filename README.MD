@@ -27,7 +27,12 @@ find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 
 
 ## Tables de la base de données
-![assets/BDD_client.png]()
+
+### Modèle conceptuel de données (MCD)
+![](./assets/BDD_client.png)
+
+### Mock 
+![](./assets/mock_client.png)
 
 ### Table customers
 
