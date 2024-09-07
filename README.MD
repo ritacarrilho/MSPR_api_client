@@ -27,6 +27,7 @@ find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 
 
 ## Tables de la base de données
+[/assets/BDD_client.png]()
 
 ### Table customers
 
