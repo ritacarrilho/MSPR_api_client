@@ -59,10 +59,10 @@ try:
         """,
         'Companies': """
             CREATE TABLE companies (
+                id_company INT AUTO_INCREMENT,
                 id_customer INT,
-                id_company INT,
                 company_name VARCHAR(80) NOT NULL,
-                PRIMARY KEY (id_customer, id_company),
+                PRIMARY KEY (id_company),
                 FOREIGN KEY (id_customer) REFERENCES Customers(id_customer)
             )
         """,
@@ -77,7 +77,7 @@ try:
         """,
         'Profiles': """
             CREATE TABLE profiles (
-                id_profile INT,
+                id_profile INT AUTO_INCREMENT,
                 first_name VARCHAR(80) NOT NULL,
                 last_name VARCHAR(50) NOT NULL,
                 id_customer INT NOT NULL,
@@ -119,22 +119,20 @@ try:
 
             # Insertion des données dans la table Companies
             insert_company = """
-                INSERT INTO companies (id_customer, id_company, company_name)
-                VALUES (%s, %s, %s)
+                INSERT INTO companies (id_customer, company_name)
+                VALUES (%s, %s)
             """
             cursor.execute(insert_company, (
                 customer['id'],
-                customer['id'],  # Utilise l'id_customer comme id_company (vous pouvez ajuster si nécessaire)
                 customer['company']['companyName']
             ))
 
             # Insertion des données dans la table Profiles
             insert_profile = """
-                INSERT INTO profiles (id_profile, first_name, last_name, id_customer)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO profiles (first_name, last_name, id_customer)
+                VALUES (%s, %s, %s)
             """
             cursor.execute(insert_profile, (
-                customer['id'],  # Utilise l'id_customer comme id_profile (vous pouvez ajuster si nécessaire)
                 customer['profile']['firstName'],
                 customer['profile']['lastName'],
                 customer['id']
