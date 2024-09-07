@@ -28,6 +28,9 @@ find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 
 ## Tables de la base de données
 
+### Mock initial
+![](./assets/mock_client.png)
+
 ### Base de données 
 - [MySQL](https://www.mysql.com/fr/)
 
@@ -36,10 +39,9 @@ find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 ### Modèle conceptuel de données (MCD)
 ![](./assets/BDD_client.png)
 
-### Mock 
-![](./assets/mock_client.png)
+### Détails tables
 
-### Table customers
+#### Table customers
 
 id (VARCHAR, clé primaire) : Identifiant unique du client.
 
@@ -57,7 +59,7 @@ postal_code (VARCHAR) : Code postal de l'adresse.
 
 city (VARCHAR) : Ville de l'adresse.
 
-### Table profiles
+#### Table profiles
 
 id (VARCHAR, clé primaire) : Identifiant unique du profil.
 
@@ -67,7 +69,7 @@ first_name (VARCHAR) : Prénom du profil.
 
 last_name (VARCHAR) : Nom de famille du profil.
 
-### Table companies
+#### Table companies
 
 id (VARCHAR, clé primaire) : Identifiant unique de l'entreprise.
 
@@ -75,7 +77,7 @@ customer_id (VARCHAR, clé étrangère) : Référence à l'identifiant du client
 
 company_name (VARCHAR) : Nom de l'entreprise.
 
-### Table orders
+#### Table orders
 
 id (VARCHAR, clé primaire) : Identifiant unique de la commande.
 
