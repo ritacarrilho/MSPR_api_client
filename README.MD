@@ -35,6 +35,11 @@ py .\create_BDD.py
 ![](/assets/create_bdd.png)
 
 ### Mock initial
+```
+https://615f5fb4f7254d0017068109.mockapi.io/api/v1/customers
+```
+*Liste de données de tous les clients.*
+
 ![](./assets/mock_client.png)
 
 ### Modèle conceptuel de données (MCD)
