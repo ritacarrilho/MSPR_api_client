@@ -22,6 +22,15 @@ app = FastAPI(
 
 @app.get("/customers/", response_model=List[schemas.Customer], tags=["customers"])
 def get_customers(db: Session = Depends(get_db)):
+    """
+    Récupère tous les clients de la base de données.
+
+    Args:
+        db (Session): La session de base de données.
+
+    Returns:
+        List[schemas.Customer]: Liste de tous les clients.
+    """
     customers = controllers.get_customers(db)
     return customers
 
