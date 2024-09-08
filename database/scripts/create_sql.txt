@@ -1,5 +1,7 @@
-DROP DATABASE IF EXISTS customer_bd
-CREATE DATABASE customer_bd 
+DROP DATABASE IF EXISTS customer_bd;
+CREATE DATABASE customer_bd;
+
+USE customer_bd;
 
 CREATE TABLE Customers(
    id_customer INT,
