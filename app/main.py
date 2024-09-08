@@ -68,3 +68,21 @@ def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_
     """
     db_customer = controllers.create_customer(db, customer)
     return db_customer
+
+@app.patch("/customers/{id}", response_model=schemas.Customer, tags=["customers"])
+def update_customer(id: int, customer: schemas.CustomerUpdate, db: Session = Depends(get_db)):
+    """
+    Met à jour un client existant avec les données fournies.
+
+    Args:
+        id (int): L'ID du client à mettre à jour.
+        customer (schemas.CustomerUpdate): Les données à modifier.
+        db (Session): La session de base de données.
+
+    Returns:
+        schemas.Customer: Les données mises à jour du client.
+    """
+    db_customer = controllers.update_customer(db, id, customer)
+    if not db_customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return db_customer

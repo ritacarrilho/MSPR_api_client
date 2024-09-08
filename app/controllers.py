@@ -34,3 +34,30 @@ def create_customer(db: Session, customer: CustomerCreate):
     db.refresh(db_customer)
     
     return db_customer
+
+def update_customer(db: Session, customer_id: int, customer_data: schemas.CustomerUpdate):
+    """
+    Met à jour les données d'un client existant.
+
+    Args:
+        db (Session): La session de base de données.
+        customer_id (int): L'ID du client à mettre à jour.
+        customer_data (CustomerUpdate): Les nouvelles données du client.
+
+    Returns:
+        Customer: Le client mis à jour.
+    """
+    db_customer = db.query(Customer).filter(Customer.id_customer == customer_id).first()
+
+    if db_customer is None:
+        raise NoResultFound("Customer not found")
+
+    # Met à jour seulement les champs fournis
+    update_data = customer_data.dict(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_customer, key, value)
+
+    db.commit()
+    db.refresh(db_customer)
+
+    return db_customer

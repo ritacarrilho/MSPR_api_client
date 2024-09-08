@@ -19,3 +19,15 @@ class Customer(CustomerBase):
 
     class Config:
         orm_mode = True
+
+class CustomerUpdate(BaseModel):
+    created_at: Optional[datetime]
+    name: Optional[str]
+    username: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    postal_code: Optional[str]
+    city: Optional[str]
+
+    class Config:
+        orm_mode = True
