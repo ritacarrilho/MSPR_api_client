@@ -16,9 +16,10 @@
 
 ### Création de la base de donnée
 ```python
-py .\create_BDD.py
+## De la racine
+py database/scripts/create_BDD.py
 ```
-![](/assets/create_bdd.png)
+![](/assets/create_bdd-2.png)
 
 ### Mock initial
 ```
