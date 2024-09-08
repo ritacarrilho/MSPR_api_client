@@ -11,9 +11,9 @@ app = FastAPI(
     version="0.0.2",
 )
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
+# @app.get("/")
+# def read_root():
+#     return {"Hello": "World"}
 
 @app.get("/customers/", response_model=List[schemas.Customer], tags=["customers"])
 def get_customers(db: Session = Depends(get_db)):
