@@ -54,6 +54,30 @@ def get_customer(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
 
+@app.get("/companies/", response_model=List[schemas.Company], tags=["companies"])
+def get_companies(db: Session = Depends(get_db)):
+    return controllers.get_all_companies(db)
+
+@app.get("/companies/{id}", response_model=schemas.Company, tags=["companies"])
+def get_company(id: int, db: Session = Depends(get_db)):
+    return controllers.get_company_by_id(db, id)
+
+@app.get("/orders/", response_model=List[schemas.Order], tags=["orders"])
+def get_orders(db: Session = Depends(get_db)):
+    return controllers.get_all_orders(db)
+
+@app.get("/orders/{id}", response_model=schemas.Order, tags=["orders"])
+def get_order(id: int, db: Session = Depends(get_db)):
+    return controllers.get_order_by_id(db, id)
+
+@app.get("/profiles/", response_model=List[schemas.Profile], tags=["profiles"])
+def get_profiles(db: Session = Depends(get_db)):
+    return controllers.get_all_profiles(db)
+
+@app.get("/profiles/{id}", response_model=schemas.Profile, tags=["profiles"])
+def get_profile(id: int, db: Session = Depends(get_db)):
+    return controllers.get_profile_by_id(db, id)
+
 @app.post("/customers/", response_model=schemas.Customer, tags=["customers"])
 def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_db)):
     """
@@ -68,6 +92,18 @@ def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_
     """
     db_customer = controllers.create_customer(db, customer)
     return db_customer
+
+@app.post("/companies/", response_model=schemas.Company, tags=["companies"])
+def create_company(company: schemas.CompanyCreate, db: Session = Depends(get_db)):
+    return controllers.create_company(db, company)
+
+@app.post("/orders/", response_model=schemas.Order, tags=["orders"])
+def create_order(order: schemas.OrderCreate, db: Session = Depends(get_db)):
+    return controllers.create_order(db, order)
+
+@app.post("/profiles/", response_model=schemas.Profile, tags=["profiles"])
+def create_profile(profile: schemas.ProfileCreate, db: Session = Depends(get_db)):
+    return controllers.create_profile(db, profile)
 
 @app.patch("/customers/{id}", response_model=schemas.Customer, tags=["customers"])
 def update_customer(id: int, customer: schemas.CustomerUpdate, db: Session = Depends(get_db)):
@@ -88,6 +124,19 @@ def update_customer(id: int, customer: schemas.CustomerUpdate, db: Session = Dep
         raise HTTPException(status_code=404, detail="Customer not found")
     return db_customer
 
+@app.patch("/companies/{id}", response_model=schemas.Company, tags=["companies"])
+def update_company(id: int, company: schemas.CompanyUpdate, db: Session = Depends(get_db)):
+    return controllers.update_company(db, id, company)
+
+@app.patch("/orders/{id}", response_model=schemas.Order, tags=["orders"])
+def update_order(id: int, order: schemas.OrderUpdate, db: Session = Depends(get_db)):
+    return controllers.update_order(db, id, order)
+
+@app.patch("/profiles/{id}", response_model=schemas.Profile, tags=["profiles"])
+def update_profile(id: int, profile: schemas.ProfileUpdate, db: Session = Depends(get_db)):
+    return controllers.update_profile(db, id, profile)
+
+
 @app.delete("/customers/{id}", response_model=schemas.Customer, tags=["customers"])
 def delete_customer(id: int, db: Session = Depends(get_db)):
     """
@@ -105,3 +154,17 @@ def delete_customer(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Customer not found")
     return db_customer
 
+@app.delete("/companies/{id}", response_model=schemas.Company, tags=["companies"])
+def delete_company(id: int, db: Session = Depends(get_db)):
+    controllers.delete_company(db, id)
+    return {"detail": "Company deleted"}
+
+@app.delete("/orders/{id}", response_model=schemas.Order, tags=["orders"])
+def delete_order(id: int, db: Session = Depends(get_db)):
+    controllers.delete_order(db, id)
+    return {"detail": "Order deleted"}
+
+@app.delete("/profiles/{id}", response_model=schemas.Profile, tags=["profiles"])
+def delete_profile(id: int, db: Session = Depends(get_db)):
+    controllers.delete_profile(db, id)
+    return {"detail": "Profile deleted"}
