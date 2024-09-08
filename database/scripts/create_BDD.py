@@ -11,7 +11,7 @@ config = {
 }
 
 # Nom de la base de données
-db_name = 'customer_bd'
+db_name = 'customer_db'
 
 # Chemin du fichier JSON
 # json_file_path = os.path.join(os.getcwd(), 'database/data', 'data.json')
