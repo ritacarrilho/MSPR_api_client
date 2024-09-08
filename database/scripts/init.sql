@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS companies(
    id_customer INT,
    company_name VARCHAR(80) NOT NULL,
    PRIMARY KEY(id_company),  -- id_company as the primary key with AUTO_INCREMENT
-   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer) ON DELETE CASCADE
+   FOREIGN KEY(id_customer) REFERENCES customers(id_customer) ON DELETE CASCADE
 );
 
 -- Orders table
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS orders(
    id_customer INT,
    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
    PRIMARY KEY(id_order),  -- id_order as the primary key with AUTO_INCREMENT
-   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer) ON DELETE CASCADE
+   FOREIGN KEY(id_customer) REFERENCES customers(id_customer) ON DELETE CASCADE
 );
 
 -- Profiles table
@@ -36,34 +36,8 @@ CREATE TABLE IF NOT EXISTS profiles(
    last_name VARCHAR(50) NOT NULL,
    id_customer INT NOT NULL,
    PRIMARY KEY(id_profile),
-   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer) ON DELETE CASCADE
+   FOREIGN KEY(id_customer) REFERENCES customers(id_customer) ON DELETE CASCADE
 );
-
--- Insert sample data into Customers table
--- INSERT INTO Customers (name, username, first_name, last_name, postal_code, city)
--- VALUES 
--- ('John Doe', 'johndoe', 'John', 'Doe', '12345', 'New York'),
--- ('Jane Smith', 'janesmith', 'Jane', 'Smith', '67890', 'Los Angeles');
-
--- -- Insert sample data into Companies table
--- INSERT INTO companies (id_customer, company_name)
--- VALUES 
--- (1, 'John Tech Solutions'),
--- (2, 'Jane Design Studio');
-
--- -- Insert sample data into Orders table
--- INSERT INTO orders (id_customer, created_at)
--- VALUES 
--- (1, '2023-01-15 10:30:00'),
--- (2, '2023-02-20 14:45:00');
-
--- -- Insert sample data into Profiles table
--- INSERT INTO profiles (first_name, last_name, id_customer)
--- VALUES 
--- ('John', 'Doe', 1),
--- ('Jane', 'Smith', 2);
-
-
 
 -- Insert sample data into Customers table
 INSERT INTO customers (created_at, name, username, first_name, last_name, postal_code, city)
