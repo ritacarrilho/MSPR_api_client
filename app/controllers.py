@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from .models import Customer
-from .schemas import Customer as CustomerSchema
+# from .schemas import Customer as CustomerSchema
 
 def get_customers(db: Session):
     return db.query(Customer).all()

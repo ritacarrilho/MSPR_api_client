@@ -1,8 +1,8 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
-# import controllers, schemas, models
-# from .database import get_db
+from . import models, schemas, controllers
+from .database import get_db
 
 app = FastAPI(
     title="Api Customer",
@@ -15,7 +15,7 @@ app = FastAPI(
 # def read_root():
 #     return {"Hello": "World"}
 
-# @app.get("/customers/", response_model=List[schemas.Customer], tags=["customers"])
-# def get_customers(db: Session = Depends(get_db)):
-#     customers = controllers.get_customers(db)
-#     return customers
+@app.get("/customers/", response_model=List[schemas.Customer], tags=["customers"])
+def get_customers(db: Session = Depends(get_db)):
+    customers = controllers.get_customers(db)
+    return customers
