@@ -37,16 +37,34 @@ def get_customers(db: Session = Depends(get_db)):
 @app.get("/customers/{id}", response_model=schemas.Customer, tags=["customers"])
 def get_customer(id: int, db: Session = Depends(get_db)):
     """
-    Get a customer by their ID.
+     Récupère un client par son ID.
 
     Args:
-        id (int): Customer ID.
-        db (Session): Database session.
+        id (int): L'ID du client.
+        db (Session): La session de base de données.
 
     Returns:
-        schemas.Customer: Customer data.
+        schemas.Customer: Les données du client.
+
+    Raises:
+        HTTPException: Si le client avec l'ID spécifié n'est pas trouvé.
     """
     customer = controllers.get_customer_by_id(db, id)
     if customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
+
+@app.post("/customers/", response_model=schemas.Customer, tags=["customers"])
+def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_db)):
+    """
+    Crée un nouveau client dans la base de données.
+
+    Args:
+        customer (schemas.CustomerCreate): Les données du client à créer.
+        db (Session): La session de base de données.
+
+    Returns:
+        schemas.Customer: Les données du client créé.
+    """
+    db_customer = controllers.create_customer(db, customer)
+    return db_customer
