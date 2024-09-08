@@ -4,4 +4,7 @@ pytest
 pytest-cov
 pylint
 python-dotenv
+pymysql
 mysql-connector-python
+sqlalchemy
+sqlalchemy-utils
