@@ -86,3 +86,20 @@ def update_customer(id: int, customer: schemas.CustomerUpdate, db: Session = Dep
     if not db_customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     return db_customer
+
+@app.delete("/customers/{id}", response_model=schemas.Customer, tags=["customers"])
+def delete_customer(id: int, db: Session = Depends(get_db)):
+    """
+    Supprime un client par son ID.
+
+    Args:
+        id (int): L'ID du client à supprimer.
+        db (Session): La session de base de données.
+
+    Returns:
+        schemas.Customer: Les données du client supprimé, ou une erreur 404 s'il n'est pas trouvé.
+    """
+    db_customer = controllers.delete_customer(db, id)
+    if db_customer is None:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return db_customer
