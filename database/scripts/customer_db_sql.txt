@@ -1,0 +1,39 @@
+DROP DATABASE IF EXISTS customer_bd
+CREATE DATABASE customer_bd 
+
+CREATE TABLE Customers(
+   id_customer INT,
+   created_at DATETIME NOT NULL,
+   name VARCHAR(80) NOT NULL,
+   username VARCHAR(80) NOT NULL,
+   first_name VARCHAR(80) NOT NULL,
+   last_name_ VARCHAR(80) NOT NULL,
+   postal_code_ VARCHAR(10) NOT NULL,
+   city VARCHAR(90) NOT NULL,
+   PRIMARY KEY(id_customer)
+);
+
+CREATE TABLE companies(
+   id_customer INT AUTO_INCREMENT,
+   id_company INT,
+   company_name_ VARCHAR(80) NOT NULL,
+   PRIMARY KEY(id_customer, id_company),
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+);
+
+CREATE TABLE orders(
+   id_customer INT,
+   id_order INT,
+   created_at DATETIME NOT NULL,
+   PRIMARY KEY(id_customer, id_order),
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+);
+
+CREATE TABLE profiles(
+   id_profile INT AUTO_INCREMENT,
+   first_name_ VARCHAR(80) NOT NULL,
+   last_name_ VARCHAR(50) NOT NULL,
+   id_customer INT NOT NULL,
+   PRIMARY KEY(id_profile),
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+);
