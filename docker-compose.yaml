@@ -6,7 +6,7 @@ services:
     environment:
       MYSQL_USER: customers
       MYSQL_PASSWORD: kawacustomers
-      MYSQL_DATABASE: kawacustomersdb
+      MYSQL_DATABASE: customer_bd
       MYSQL_ROOT_PASSWORD: rootpassword
     ports:
       - "3252:3306" 
@@ -14,6 +14,7 @@ services:
       - "3306"
     volumes:
       - customers-data:/var/lib/mysql
+      - ./database/scripts:/docker-entrypoint-initdb.d
     networks:
       - kawa-customers-network
 
@@ -26,7 +27,7 @@ services:
     depends_on:
       - kawa-customers-db
     environment:
-      - DATABASE_URL=mysql+mysqlconnector://customers:kawacustomers@kawa-customers-db:3306/kawacustomersdb
+      - DATABASE_URL=mysql+mysqlconnector://customers:kawacustomers@kawa-customers-db:3306/customer_bd
     networks:
       - kawa-customers-network
 

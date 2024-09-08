@@ -46,7 +46,7 @@ try:
     # Définir les requêtes de création des tables
     create_tables_queries = {
         'Customers': """
-            CREATE TABLE Customers (
+            CREATE TABLE customers (
                 id_customer INT,
                 created_at DATETIME NOT NULL,
                 name VARCHAR(80) NOT NULL,
@@ -64,7 +64,7 @@ try:
                 id_customer INT,
                 company_name VARCHAR(80) NOT NULL,
                 PRIMARY KEY (id_company),
-                FOREIGN KEY (id_customer) REFERENCES Customers(id_customer)
+                FOREIGN KEY (id_customer) REFERENCES customers(id_customer)
             )
         """,
         'Orders': """
@@ -73,7 +73,7 @@ try:
                 id_order INT,
                 created_at DATETIME NOT NULL,
                 PRIMARY KEY (id_customer, id_order),
-                FOREIGN KEY (id_customer) REFERENCES Customers(id_customer)
+                FOREIGN KEY (id_customer) REFERENCES customers(id_customer)
             )
         """,
         'Profiles': """
@@ -83,7 +83,7 @@ try:
                 last_name VARCHAR(50) NOT NULL,
                 id_customer INT NOT NULL,
                 PRIMARY KEY (id_profile),
-                FOREIGN KEY (id_customer) REFERENCES Customers(id_customer)
+                FOREIGN KEY (id_customer) REFERENCES customers(id_customer)
             )
         """
     }
@@ -104,7 +104,7 @@ try:
         # Insertion des données dans la table Customers
         for customer in data:
             insert_customer = """
-                INSERT INTO Customers (id_customer, created_at, name, username, first_name, last_name, postal_code, city)
+                INSERT INTO customers (id_customer, created_at, name, username, first_name, last_name, postal_code, city)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
             """
             cursor.execute(insert_customer, (
