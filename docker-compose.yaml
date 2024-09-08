@@ -6,10 +6,10 @@ services:
     environment:
       MYSQL_USER: customers
       MYSQL_PASSWORD: kawacustomers
-      MYSQL_DATABASE: customer_bd
+      MYSQL_DATABASE: customer_db
       MYSQL_ROOT_PASSWORD: rootpassword
     ports:
-      - "3252:3306" 
+      - "3306:3306" 
     expose:
       - "3306"
     volumes:
@@ -27,7 +27,7 @@ services:
     depends_on:
       - kawa-customers-db
     environment:
-      - DATABASE_URL=mysql+mysqlconnector://customers:kawacustomers@kawa-customers-db:3306/customer_bd
+      - DATABASE_URL=mysql+mysqlconnector://customers:kawacustomers@kawa-customers-db:3306/customer_db
     networks:
       - kawa-customers-network
 
