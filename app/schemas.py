@@ -21,13 +21,13 @@ class Customer(CustomerBase):
         orm_mode = True
 
 class CustomerUpdate(BaseModel):
-    created_at: Optional[datetime]
-    name: Optional[str]
-    username: Optional[str]
-    first_name: Optional[str]
-    last_name: Optional[str]
-    postal_code: Optional[str]
-    city: Optional[str]
+    created_at: Optional[datetime] = None
+    name: Optional[str] = None
+    username: Optional[str] = None
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    postal_code: Optional[str] = None
+    city: Optional[str] = None
 
     class Config:
         orm_mode = True

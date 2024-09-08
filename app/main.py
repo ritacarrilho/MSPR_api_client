@@ -82,7 +82,8 @@ def update_customer(id: int, customer: schemas.CustomerUpdate, db: Session = Dep
     Returns:
         schemas.Customer: Les données mises à jour du client.
     """
-    db_customer = controllers.update_customer(db, id, customer)
-    if not db_customer:
+    try:
+        db_customer = controllers.update_customer(db, id, customer)
+        return db_customer
+    except NoResultFound:
         raise HTTPException(status_code=404, detail="Customer not found")
-    return db_customer
