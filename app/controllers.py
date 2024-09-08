@@ -51,3 +51,13 @@ def update_customer(db: Session, customer_id: int, customer_data: schemas.Custom
     db.refresh(db_customer)
 
     return db_customer
+
+def delete_customer(db: Session, customer_id: int):
+    db_customer = db.query(Customer).filter(Customer.id_customer == customer_id).first()
+
+    if db_customer is None:
+        return None
+
+    db.delete(db_customer)
+    db.commit()
+    return db_customer
