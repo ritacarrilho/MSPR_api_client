@@ -30,7 +30,7 @@ https://615f5fb4f7254d0017068109.mockapi.io/api/v1/customers
 ![](./assets/mock_client.png)
 
 ### Modèle Conceptuel de Données (MCD)
-![](./assets/BDD_client.png)
+![](./assets/BDD_client-2.png)
 
 #### Modèle Logique de Données (MLD)
 ![](./assets/mld.png)
