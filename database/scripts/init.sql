@@ -1,96 +1,181 @@
--- Customers table
-CREATE TABLE IF NOT EXISTS customers(
-   id_customer INT AUTO_INCREMENT,
-   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   name VARCHAR(80) NOT NULL,
-   username VARCHAR(80) NOT NULL,
-   first_name VARCHAR(80) NOT NULL,
-   last_name VARCHAR(80) NOT NULL,
-   postal_code VARCHAR(10) NOT NULL,
-   city VARCHAR(90) NOT NULL,
-   PRIMARY KEY(id_customer)
-);
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- Companies table (fix: only id_company has AUTO_INCREMENT)
-CREATE TABLE IF NOT EXISTS companies(
-   id_company INT AUTO_INCREMENT,
-   id_customer INT,
-   company_name VARCHAR(80) NOT NULL,
-   PRIMARY KEY(id_company),  -- id_company as the primary key with AUTO_INCREMENT
-   FOREIGN KEY(id_customer) REFERENCES customers(id_customer) ON DELETE CASCADE
-);
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
--- Orders table
-CREATE TABLE IF NOT EXISTS orders(
-   id_order INT AUTO_INCREMENT,
-   id_customer INT,
-   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   PRIMARY KEY(id_order),  -- id_order as the primary key with AUTO_INCREMENT
-   FOREIGN KEY(id_customer) REFERENCES customers(id_customer) ON DELETE CASCADE
-);
+-- --------------------------------------------------------
+-- Database: customer_db
+-- --------------------------------------------------------
 
--- Profiles table
-CREATE TABLE IF NOT EXISTS profiles(
-   id_profile INT AUTO_INCREMENT,
-   first_name VARCHAR(80) NOT NULL,
-   last_name VARCHAR(50) NOT NULL,
-   id_customer INT NOT NULL,
-   PRIMARY KEY(id_profile),
-   FOREIGN KEY(id_customer) REFERENCES customers(id_customer) ON DELETE CASCADE
-);
+-- --------------------------------------------------------
+-- Table structure for `addresses`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `addresses`;
+CREATE TABLE IF NOT EXISTS `addresses` (
+  `id_address` int NOT NULL AUTO_INCREMENT,
+  `address_line1` varchar(255) NOT NULL,
+  `address_line2` varchar(255) DEFAULT NULL,
+  `city` varchar(100) NOT NULL,
+  `state` varchar(100) DEFAULT NULL,
+  `postal_code` varchar(20) NOT NULL,
+  `country` varchar(100) NOT NULL,
+  `address_type` int NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` varchar(50) DEFAULT NULL,
+  `id_customer` int NOT NULL,
+  PRIMARY KEY (`id_address`),
+  KEY `id_customer` (`id_customer`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Insert sample data into customers table
-INSERT INTO customers (created_at, name, username, first_name, last_name, postal_code, city)
-VALUES 
-('2023-08-29 16:28:58', 'Jan Schiller', 'Kailee.Greenholt73', 'Keven', 'Kris', '61432-1180', 'St. Joseph'),
-('2023-08-30 12:38:41', 'Joanne Breitenberg', 'Lue98', 'Robbie', 'Oberbrunner', '24609-3023', 'San Tan Valley'),
-('2023-08-30 13:26:04', 'Bridget Torp', 'Bobbie_Dickens', 'Bradford', 'Kuphal', '48348', 'East Toniton'),
-('2023-08-30 02:44:11', 'Gina Dicki', 'Madelynn73', 'Freeman', 'Kessler', '47788', 'Boganfort'),
-('2023-08-29 16:48:46', 'Jeannie Bailey', 'Jordi.Marks', 'Doyle', 'Beier', '56546', 'Pharr'),
-('2023-08-29 14:53:59', 'Rose Nolan', 'Kaya_Hintz38', 'Fern', 'Klocko', '60926-4558', 'New Novaberg'),
-('2023-08-29 22:26:29', 'Miss Darrell Simonis', 'Johan_Kihn', 'Guido', 'West', '30273-1807', 'Autumnton'),
-('2023-08-30 08:38:40', 'Tony Grimes', 'Nella.Franey', 'Alfonzo', 'Bergnaum', '31080', 'Elmhurst'),
-('2023-08-30 10:18:08', 'Wendell Stoltenberg DDS', 'Aaliyah.Walter', 'Dillon', 'Leuschke', '70883', 'West Hildafort'),
-('2023-08-29 18:59:05', 'Miss Leonard Russel', 'Dakota.Cremin', 'Garfield', 'Koss', '91773', 'Georgiannastead');
+-- --------------------------------------------------------
+-- Data for table `addresses`
+-- --------------------------------------------------------
+INSERT INTO `addresses` (`id_address`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`, `country`, `address_type`, `created_at`, `updated_at`, `id_customer`) VALUES
+(1, '15 Rue des Lilas', NULL, 'Lyon', 'Auvergne-Rhône-Alpes', '69003', 'France', 1, '2024-09-09 19:02:12', NULL, 1),
+(2, '100 Avenue des Champs-Élysées', 'Apt. 12B', 'Paris', NULL, '75008', 'France', 2, '2024-09-09 19:02:12', NULL, 2);
 
--- Insert sample data into companies table
-INSERT INTO companies (id_customer, company_name)
-VALUES 
-(1, 'Bechtelar LLC'),
-(2, 'Rowe - Robel'),
-(3, 'Fritsch, Bayer and Sanford'),
-(4, 'Koepp, Abernathy and Wisozk'),
-(5, 'Crona Group'),
-(6, 'Pollich, Gorczany and Wolf'),
-(7, 'Smitham, Labadie and Kovacek'),
-(8, 'Luettgen and Sons'),
-(9, 'Willms, Purdy and Gorczany'),
-(10, 'Stamm, Lubowitz and Ryan');
+-- --------------------------------------------------------
+-- Table structure for `companies`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `companies`;
+CREATE TABLE IF NOT EXISTS `companies` (
+  `id_company` int NOT NULL AUTO_INCREMENT,
+  `company_name` varchar(80) NOT NULL,
+  `siret` varchar(15) NOT NULL,
+  `address` varchar(255) NOT NULL,
+  `postal_code` varchar(10) NOT NULL,
+  `city` varchar(90) NOT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id_company`),
+  UNIQUE KEY `siret` (`siret`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Insert sample data into Orders table
-INSERT INTO orders (id_customer, created_at)
-VALUES 
-(1, '2023-08-30 08:35:27'),
-(1, '2023-08-30 05:22:50'),
-(2, '2023-08-29 19:21:39'),
-(2, '2023-08-30 10:01:12'),
-(3, '2023-08-29 21:22:06'),
-(3, '2023-08-29 22:22:50'),
-(4, '2023-08-30 13:52:46'),
-(4, '2023-08-30 08:07:15'),
-(5, '2023-08-29 16:24:29'),
-(5, '2023-08-30 12:53:48');
+-- --------------------------------------------------------
+-- Data for table `companies`
+-- --------------------------------------------------------
+INSERT INTO `companies` (`id_company`, `company_name`, `siret`, `address`, `postal_code`, `city`, `phone`, `email`) VALUES
+(1, 'Coffee Distributors Inc.', '12345678901234', '10 Rue de la Paix', '75002', 'Paris', '0155567788', 'contact@coffee-distributors.com'),
+(2, 'Café Express SARL', '98765432109876', '5 Boulevard des Capucines', '75009', 'Paris', '0177889988', 'info@cafeexpress.fr');
 
--- Insert sample data into Profiles table
-INSERT INTO profiles (first_name, last_name, id_customer)
-VALUES 
-('Mitchell', 'Carter', 1),
-('Chauncey', 'Borer', 2),
-('Noah', 'Veum', 3),
-('Rachael', 'Welch', 4),
-('Annamae', 'Daugherty', 5),
-('Celia', 'Sanford', 6),
-('Guadalupe', 'Kris', 7),
-('Laron', 'Satterfield', 8),
-('Addie', 'Ondricka', 9),
-('Santiago', 'Willms', 10);
+-- --------------------------------------------------------
+-- Table structure for `customers`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `customers`;
+CREATE TABLE IF NOT EXISTS `customers` (
+  `id_customer` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(80) NOT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  `username` varchar(80) NOT NULL,
+  `first_name` varchar(80) NOT NULL,
+  `last_name` varchar(80) NOT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `email` varchar(100) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `last_login` datetime NOT NULL,
+  `customer_type` int NOT NULL,
+  `failed_login_attempts` int DEFAULT '0',
+  `preferred_contact_method` int DEFAULT NULL,
+  `opt_in_marketing` tinyint(1) DEFAULT NULL,
+  `loyalty_points` int NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id_customer`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Data for table `customers`
+-- --------------------------------------------------------
+INSERT INTO `customers` (`id_customer`, `name`, `created_at`, `updated_at`, `username`, `first_name`, `last_name`, `phone`, `email`, `password_hash`, `last_login`, `customer_type`, `failed_login_attempts`, `preferred_contact_method`, `opt_in_marketing`, `loyalty_points`) VALUES
+(1, 'CaféLover', '2024-09-09 19:02:12', NULL, 'cafefan123', 'Jean', 'Dupont', '0612345678', 'jean.dupont@example.com', 'hashedpassword123', '2024-09-09 19:02:12', 1, 0, 1, 1, 120),
+(2, 'ProBarista', '2024-09-09 19:02:12', NULL, 'barista_pro', 'Marie', 'Durand', '0698765432', 'marie.durand@procoffee.com', 'hashedpassword456', '2024-09-09 19:02:12', 2, 0, 2, 1, 300);
+
+-- --------------------------------------------------------
+-- Table structure for `customer_companies`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `customer_companies`;
+CREATE TABLE IF NOT EXISTS `customer_companies` (
+  `id_customer` int NOT NULL AUTO_INCREMENT,
+  `id_company` int NOT NULL,
+  PRIMARY KEY (`id_customer`,`id_company`),
+  KEY `id_company` (`id_company`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Data for table `customer_companies`
+-- --------------------------------------------------------
+INSERT INTO `customer_companies` (`id_customer`, `id_company`) VALUES
+(2, 1),
+(2, 2);
+
+-- --------------------------------------------------------
+-- Table structure for `customer_feedback`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `customer_feedback`;
+CREATE TABLE IF NOT EXISTS `customer_feedback` (
+  `id_feedback` int NOT NULL AUTO_INCREMENT,
+  `product_id` int NOT NULL,
+  `rating` int DEFAULT NULL,
+  `comment` varchar(50) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `id_customer` int NOT NULL,
+  PRIMARY KEY (`id_feedback`),
+  KEY `id_customer` (`id_customer`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Data for table `customer_feedback`
+-- --------------------------------------------------------
+INSERT INTO `customer_feedback` (`id_feedback`, `product_id`, `rating`, `comment`, `created_at`, `id_customer`) VALUES
+(1, 1, 5, 'Amazing coffee, will buy again!', '2024-09-09 19:02:12', 1),
+(2, 2, 4, 'Good quality but a bit pricey.', '2024-09-09 19:02:12', 2);
+
+-- --------------------------------------------------------
+-- Table structure for `login_logs`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `login_logs`;
+CREATE TABLE IF NOT EXISTS `login_logs` (
+  `id_log` int NOT NULL AUTO_INCREMENT,
+  `login_time` datetime NOT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` varchar(255) DEFAULT NULL,
+  `id_customer` int NOT NULL,
+  PRIMARY KEY (`id_log`),
+  KEY `id_customer` (`id_customer`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Data for table `login_logs`
+-- --------------------------------------------------------
+INSERT INTO `login_logs` (`id_log`, `login_time`, `ip_address`, `user_agent`, `id_customer`) VALUES
+(1, '2024-09-09 19:02:12', '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 1),
+(2, '2024-09-09 19:02:12', '192.168.1.2', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 2);
+
+-- --------------------------------------------------------
+-- Table structure for `notifications`
+-- --------------------------------------------------------
+DROP TABLE IF EXISTS `notifications`;
+CREATE TABLE IF NOT EXISTS `notifications` (
+  `id_notification` int NOT NULL AUTO_INCREMENT,
+  `message` varchar(255) NOT NULL,
+  `date_created` datetime DEFAULT NULL,
+  `is_read` tinyint(1) DEFAULT '0',
+  `type` int NOT NULL,
+  `id_customer` int NOT NULL,
+  PRIMARY KEY (`id_notification`),
+  KEY `id_customer` (`id_customer`)
+) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+-- Data for table `notifications`
+-- --------------------------------------------------------
+INSERT INTO `notifications` (`id_notification`, `message`, `date_created`, `is_read`, `type`, `id_customer`) VALUES
+(1, 'Your order has been shipped!', '2024-09-09 19:02:12', 0, 1, 1),
+(2, 'New product available: Organic Arabica!', '2024-09-09 19:02:12', 1, 2, 2);
+
+COMMIT;
