@@ -53,10 +53,10 @@ CREATE TABLE Notifications(
    id_notification INT AUTO_INCREMENT,
    message VARCHAR(255) NOT NULL,
    date_created DATETIME,
-   is_read LOGICAL DEFAULT FALSE,
+   is_read BOOLEAN DEFAULT FALSE,
    type INT NOT NULL,
    id_customer INT NOT NULL,
-   PRIMARY KEY(id_notification_),
+   PRIMARY KEY(id_notification),
    FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
 );
 
@@ -72,7 +72,7 @@ CREATE TABLE Addresses(
    created_at DATETIME NOT NULL,
    updated_at VARCHAR(50),
    id_customer INT NOT NULL,
-   PRIMARY KEY(id_address_),
+   PRIMARY KEY(id_address),
    FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
 );
 
@@ -82,7 +82,7 @@ CREATE TABLE Login_Logs_(
    ip_address VARCHAR(45),
    user_agent VARCHAR(255),
    id_customer INT NOT NULL,
-   PRIMARY KEY(id_log_),
+   PRIMARY KEY(id_log),
    FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
 );
 
