@@ -33,7 +33,7 @@ https://615f5fb4f7254d0017068109.mockapi.io/api/v1/customers
 ![](./assets/BDD_client-2.png)
 
 #### Modèle Logique de Données (MLD)
-![](./assets/mld.png)
+![](./assets/mld-2.png)
 
 
 ### Détails tables
