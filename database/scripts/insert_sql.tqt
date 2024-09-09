@@ -1,0 +1,34 @@
+INSERT INTO Customers (name, created_at, updated_at, username, first_name, last_name, phone, email, password_hash, last_login, customer_type, failed_login_attempts, preferred_contact_method, opt_in_marketing, loyalty_points) 
+VALUES 
+('CaféLover', NOW(), NULL, 'cafefan123', 'Jean', 'Dupont', '0612345678', 'jean.dupont@example.com', 'hashedpassword123', NOW(), 1, 0, 1, TRUE, 120),
+('ProBarista', NOW(), NULL, 'barista_pro', 'Marie', 'Durand', '0698765432', 'marie.durand@procoffee.com', 'hashedpassword456', NOW(), 2, 0, 2, TRUE, 300);
+
+INSERT INTO Companies (company_name, siret, address, postal_code, city, phone, email) 
+VALUES 
+('Coffee Distributors Inc.', '12345678901234', '10 Rue de la Paix', '75002', 'Paris', '0155567788', 'contact@coffee-distributors.com'),
+('Café Express SARL', '98765432109876', '5 Boulevard des Capucines', '75009', 'Paris', '0177889988', 'info@cafeexpress.fr');
+
+INSERT INTO Customer_Feedback (product_id, rating, comment, created_at, id_customer) 
+VALUES 
+(1, 5, 'Amazing coffee, will buy again!', NOW(), 1),
+(2, 4, 'Good quality but a bit pricey.', NOW(), 2);
+
+INSERT INTO Notifications (message, date_created, is_read, type, id_customer) 
+VALUES 
+('Your order has been shipped!', NOW(), FALSE, 1, 1),
+('New product available: Organic Arabica!', NOW(), TRUE, 2, 2);
+
+INSERT INTO Addresses (address_line1, address_line2, city, state, postal_code, country, address_type, created_at, updated_at, id_customer) 
+VALUES 
+('15 Rue des Lilas', NULL, 'Lyon', 'Auvergne-Rhône-Alpes', '69003', 'France', 1, NOW(), NULL, 1),
+('100 Avenue des Champs-Élysées', 'Apt. 12B', 'Paris', NULL, '75008', 'France', 2, NOW(), NULL, 2);
+
+INSERT INTO Login_Logs (login_time, ip_address, user_agent, id_customer) 
+VALUES 
+(NOW(), '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 1),
+(NOW(), '192.168.1.2', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 2);
+
+INSERT INTO Customer_Companies (id_customer, id_company) 
+VALUES 
+(2, 1),
+(2, 2);
