@@ -4,38 +4,92 @@ CREATE DATABASE customer_db;
 USE customer_db;
 
 CREATE TABLE Customers(
-   id_customer INT,
-   created_at DATETIME NOT NULL,
+   id_customer INT AUTO_INCREMENT,
    name VARCHAR(80) NOT NULL,
+   created_at DATETIME NOT NULL,
+   updated_at DATETIME,
    username VARCHAR(80) NOT NULL,
    first_name VARCHAR(80) NOT NULL,
    last_name VARCHAR(80) NOT NULL,
+   phone VARCHAR(15),
+   email VARCHAR(100) NOT NULL,
+   password_hash VARCHAR(255) NOT NULL,
+   last_login DATETIME NOT NULL,
+   customer_type INT NOT NULL,
+   failed_login_attempts INT DEFAULT 0,
+   preferred_contact_method INT,
+   opt_in_marketing LOGICAL,
+   loyalty_points INT NOT NULL DEFAULT 0,
+   PRIMARY KEY(id_customer),
+   UNIQUE(email)
+);
+
+CREATE TABLE Companies(
+   id_company INT AUTO_INCREMENT,
+   company_name VARCHAR(80) NOT NULL,
+   siret VARCHAR(15) NOT NULL,
+   address VARCHAR(255) NOT NULL,
    postal_code VARCHAR(10) NOT NULL,
    city VARCHAR(90) NOT NULL,
-   PRIMARY KEY(id_customer)
+   phone VARCHAR(15),
+   email VARCHAR(100),
+   PRIMARY KEY(id_company),
+   UNIQUE(siret),
+   UNIQUE(email)
 );
 
-CREATE TABLE companies(
+CREATE TABLE Customer_Feedback_(
+   id_feedback INT AUTO_INCREMENT,
+   product_id INT NOT NULL,
+   rating INT,
+   comment VARCHAR(50),
+   created_at DATETIME,
+   id_customer INT NOT NULL,
+   PRIMARY KEY(id_feedback),
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+);
+
+CREATE TABLE Notifications(
+   id_notification INT AUTO_INCREMENT,
+   message VARCHAR(255) NOT NULL,
+   date_created DATETIME,
+   is_read LOGICAL DEFAULT FALSE,
+   type INT NOT NULL,
+   id_customer INT NOT NULL,
+   PRIMARY KEY(id_notification_),
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+);
+
+CREATE TABLE Addresses(
+   id_address INT AUTO_INCREMENT,
+   address_line1 VARCHAR(255) NOT NULL,
+   address_line2 VARCHAR(255),
+   city VARCHAR(100) NOT NULL,
+   state VARCHAR(100),
+   postal_code VARCHAR(20) NOT NULL,
+   country VARCHAR(100) NOT NULL,
+   address_type INT NOT NULL,
+   created_at DATETIME NOT NULL,
+   updated_at VARCHAR(50),
+   id_customer INT NOT NULL,
+   PRIMARY KEY(id_address_),
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+);
+
+CREATE TABLE Login_Logs_(
+   id_log INT AUTO_INCREMENT,
+   login_time DATETIME NOT NULL,
+   ip_address VARCHAR(45),
+   user_agent VARCHAR(255),
+   id_customer INT NOT NULL,
+   PRIMARY KEY(id_log_),
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+);
+
+CREATE TABLE Customer_Companies(
    id_customer INT AUTO_INCREMENT,
    id_company INT,
-   company_name VARCHAR(80) NOT NULL,
    PRIMARY KEY(id_customer, id_company),
-   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
-);
-
-CREATE TABLE orders(
-   id_customer INT,
-   id_order INT,
-   created_at DATETIME NOT NULL,
-   PRIMARY KEY(id_customer, id_order),
-   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
-);
-
-CREATE TABLE profiles(
-   id_profile INT AUTO_INCREMENT,
-   first_name VARCHAR(80) NOT NULL,
-   last_name VARCHAR(50) NOT NULL,
-   id_customer INT NOT NULL,
-   PRIMARY KEY(id_profile),
-   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer),
+   FOREIGN KEY(id_company) REFERENCES Companies(id_company)
 );
