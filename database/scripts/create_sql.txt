@@ -18,7 +18,7 @@ CREATE TABLE Customers(
    customer_type INT NOT NULL,
    failed_login_attempts INT DEFAULT 0,
    preferred_contact_method INT,
-   opt_in_marketing LOGICAL,
+   opt_in_marketing BOOLEAN,
    loyalty_points INT NOT NULL DEFAULT 0,
    PRIMARY KEY(id_customer),
    UNIQUE(email)
