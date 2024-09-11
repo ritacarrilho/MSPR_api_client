@@ -83,7 +83,11 @@ customer_id (INT, clé étrangère) : Référence à l'identifiant du client.
 created_at (DATETIME) : Date de création de la commande.
 
 ## Endpoints de l'API
-![](/assets/api-endpoint.png)
+![](/assets/ed-1.png)
+![](/assets/ed-2.png)
+![](/assets/ed-3.png)
+![](/assets/ed-4.png)
+![](/assets/ed-5.png)
 
 ## Docker
 
