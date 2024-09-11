@@ -1,9 +1,10 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
 from . import models, schemas, controllers
 from .database import get_db
+from typing import List
 
+# Initialisation de l'application FastAPI
 app = FastAPI(
     title="Paye ton kawa",
     description="Le café c'est la vie",
@@ -20,108 +21,108 @@ app = FastAPI(
 #     except Exception as e:
 #         return {"status": "error", "details": str(e)}
 
-@app.get("/customers/", response_model=List[schemas.Customer], tags=["customers"])
-def get_customers(db: Session = Depends(get_db)):
+# ---------------------- Customer Endpoints ---------------------- #
+
+@app.get("/customers/", response_model=List[schemas.Customer])
+def read_customers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     """
-    Récupère tous les clients de la base de données.
-
-    Args:
-        db (Session): La session de base de données.
-
-    Returns:
-        List[schemas.Customer]: Liste de tous les clients.
+    Récupère la liste des clients.
     """
     customers = controllers.get_customers(db)
     return customers
 
-@app.get("/customers/{id}", response_model=schemas.Customer, tags=["customers"])
-def get_customer(id: int, db: Session = Depends(get_db)):
+@app.get("/customers/{customer_id}", response_model=schemas.Customer)
+def read_customer(customer_id: int, db: Session = Depends(get_db)):
     """
-     Récupère un client par son ID.
-
-    Args:
-        id (int): L'ID du client.
-        db (Session): La session de base de données.
-
-    Returns:
-        schemas.Customer: Les données du client.
-
-    Raises:
-        HTTPException: Si le client avec l'ID spécifié n'est pas trouvé.
+    Récupère un client par ID.
     """
-    customer = controllers.get_customer_by_id(db, id)
+    customer = controllers.get_customer_by_id(db, customer_id)
     if customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
 
-@app.get("/companies/", response_model=List[schemas.Company], tags=["companies"])
-def get_companies(db: Session = Depends(get_db)):
-    return controllers.get_all_companies(db)
-
-@app.get("/companies/{id}", response_model=schemas.Company, tags=["companies"])
-def get_company(id: int, db: Session = Depends(get_db)):
-    return controllers.get_company_by_id(db, id)
-
-@app.post("/customers/", response_model=schemas.Customer, tags=["customers"])
+@app.post("/customers/", response_model=schemas.Customer)
 def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_db)):
     """
-    Crée un nouveau client dans la base de données.
-
-    Args:
-        customer (schemas.CustomerCreate): Les données du client à créer.
-        db (Session): La session de base de données.
-
-    Returns:
-        schemas.Customer: Les données du client créé.
+    Crée un nouveau client.
     """
-    db_customer = controllers.create_customer(db, customer)
-    return db_customer
+    return controllers.create_customer(db, customer)
 
-@app.post("/companies/", response_model=schemas.Company, tags=["companies"])
+@app.patch("/customers/{customer_id}", response_model=schemas.Customer)
+def update_customer(customer_id: int, customer_update: schemas.CustomerUpdate, db: Session = Depends(get_db)):
+    """
+    Met à jour un client existant.
+    """
+    return controllers.update_customer(db, customer_id, customer_update)
+
+@app.delete("/customers/{customer_id}")
+def delete_customer(customer_id: int, db: Session = Depends(get_db)):
+    """
+    Supprime un client par ID.
+    """
+    deleted_customer = controllers.delete_customer(db, customer_id)
+    if deleted_customer is None:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return {"message": "Customer deleted successfully"}
+
+# ---------------------- Company Endpoints ---------------------- #
+
+@app.get("/companies/", response_model=List[schemas.Company])
+def read_companies(db: Session = Depends(get_db)):
+    """
+    Récupère la liste des entreprises.
+    """
+    companies = controllers.get_all_companies(db)
+    return companies
+
+@app.get("/companies/{company_id}", response_model=schemas.Company)
+def read_company(company_id: int, db: Session = Depends(get_db)):
+    """
+    Récupère une entreprise par ID.
+    """
+    company = controllers.get_company_by_id(db, company_id)
+    if company is None:
+        raise HTTPException(status_code=404, detail="Company not found")
+    return company
+
+@app.post("/companies/", response_model=schemas.Company)
 def create_company(company: schemas.CompanyCreate, db: Session = Depends(get_db)):
+    """
+    Crée une nouvelle entreprise.
+    """
     return controllers.create_company(db, company)
 
-@app.patch("/customers/{id}", response_model=schemas.Customer, tags=["customers"])
-def update_customer(id: int, customer: schemas.CustomerUpdate, db: Session = Depends(get_db)):
+@app.patch("/companies/{company_id}", response_model=schemas.Company)
+def update_company(company_id: int, company_update: schemas.CompanyUpdate, db: Session = Depends(get_db)):
     """
-    Met à jour un client existant avec les données fournies.
-
-    Args:
-        id (int): L'ID du client à mettre à jour.
-        customer (schemas.CustomerUpdate): Les données à modifier.
-        db (Session): La session de base de données.
-
-    Returns:
-        schemas.Customer: Les données mises à jour du client.
+    Met à jour une entreprise existante.
     """
-    
-    db_customer = controllers.update_customer(db, id, customer)
-    if not db_customer:
-        raise HTTPException(status_code=404, detail="Customer not found")
-    return db_customer
+    return controllers.update_company(db, company_id, company_update)
 
-@app.patch("/companies/{id}", response_model=schemas.Company, tags=["companies"])
-def update_company(id: int, company: schemas.CompanyUpdate, db: Session = Depends(get_db)):
-    return controllers.update_company(db, id, company)
-
-@app.delete("/customers/{id}", response_model=schemas.Customer, tags=["customers"])
-def delete_customer(id: int, db: Session = Depends(get_db)):
+@app.delete("/companies/{company_id}")
+def delete_company(company_id: int, db: Session = Depends(get_db)):
     """
-    Supprime un client par son ID.
-
-    Args:
-        id (int): L'ID du client à supprimer.
-        db (Session): La session de base de données.
-
-    Returns:
-        schemas.Customer: Les données du client supprimé, ou une erreur 404 s'il n'est pas trouvé.
+    Supprime une entreprise par ID.
     """
-    db_customer = controllers.delete_customer(db, id)
-    if db_customer is None:
-        raise HTTPException(status_code=404, detail="Customer not found")
-    return db_customer
+    deleted_company = controllers.delete_company(db, company_id)
+    if deleted_company is None:
+        raise HTTPException(status_code=404, detail="Company not found")
+    return {"message": "Company deleted successfully"}
 
-@app.delete("/companies/{id}", response_model=schemas.Company, tags=["companies"])
-def delete_company(id: int, db: Session = Depends(get_db)):
-    controllers.delete_company(db, id)
-    return {"detail": "Company deleted"}
+# ---------------------- Feedback Endpoints ---------------------- #
+
+@app.post("/feedbacks/", response_model=schemas.FeedbackCreate)
+def create_feedback(feedback: schemas.FeedbackCreate, db: Session = Depends(get_db)):
+    """
+    Crée un feedback pour un produit.
+    """
+    return controllers.create_feedback(db, feedback)
+
+# ---------------------- Notification Endpoints ---------------------- #
+
+@app.post("/notifications/", response_model=schemas.NotificationCreate)
+def create_notification(notification: schemas.NotificationCreate, db: Session = Depends(get_db)):
+    """
+    Crée une notification pour un client.
+    """
+    return controllers.create_notification(db, notification)
