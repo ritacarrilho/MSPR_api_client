@@ -89,8 +89,29 @@ class Feedback(FeedbackBase):
         orm_mode = True
 
 # Schéma pour la création d'un Feedback
+class FeedbackBase(BaseModel):
+    product_id: int
+    rating: Optional[int] = None
+    comment: Optional[str] = None
+    created_at: Optional[datetime] = None
+    id_customer: int
+
 class FeedbackCreate(FeedbackBase):
     pass
+
+class FeedbackUpdate(BaseModel):
+    rating: Optional[int] = None
+    comment: Optional[str] = None
+    created_at: Optional[datetime] = None
+
+    class Config:
+        orm_mode = True
+
+class Feedback(FeedbackBase):
+    id_feedback: int
+
+    class Config:
+        orm_mode = True
 
 # Schéma pour Notification
 class NotificationBase(BaseModel):

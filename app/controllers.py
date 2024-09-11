@@ -129,20 +129,33 @@ def delete_company(db: Session, company_id: int):
 
 # --------------------- Feedback Controllers --------------------- #
 
+def get_feedbacks(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(models.Feedback).offset(skip).limit(limit).all()
+
+def get_feedback_by_id(db: Session, feedback_id: int):
+    return db.query(models.Feedback).filter(models.Feedback.id_feedback == feedback_id).first()
+
 def create_feedback(db: Session, feedback: schemas.FeedbackCreate):
-    """
-    Crée un feedback pour un produit.
-    """
-    db_feedback = models.Customer_Feedback(
-        product_id=feedback.product_id,
-        rating=feedback.rating,
-        comment=feedback.comment,
-        created_at=feedback.created_at,
-        id_customer=feedback.id_customer
-    )
+    db_feedback = models.Feedback(**feedback.dict())
     db.add(db_feedback)
     db.commit()
     db.refresh(db_feedback)
+    return db_feedback
+
+def update_feedback(db: Session, feedback_id: int, feedback_update: schemas.FeedbackUpdate):
+    db_feedback = db.query(models.Feedback).filter(models.Feedback.id_feedback == feedback_id).first()
+    if db_feedback:
+        for key, value in feedback_update.dict(exclude_unset=True).items():
+            setattr(db_feedback, key, value)
+        db.commit()
+        db.refresh(db_feedback)
+    return db_feedback
+
+def delete_feedback(db: Session, feedback_id: int):
+    db_feedback = db.query(models.Feedback).filter(models.Feedback.id_feedback == feedback_id).first()
+    if db_feedback:
+        db.delete(db_feedback)
+        db.commit()
     return db_feedback
 
 # --------------------- Notification Controllers --------------------- #

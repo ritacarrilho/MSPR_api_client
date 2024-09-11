@@ -23,7 +23,7 @@ class Customer(Base):
     loyalty_points = Column(Integer, nullable=False, default=0)
 
     companies = relationship("Company", secondary="Customer_Companies")
-    feedbacks = relationship("CustomerFeedback", back_populates="customer")
+    feedbacks = relationship("Feedback", back_populates="customer")
     notifications = relationship("Notification", back_populates="customer")
     addresses = relationship("Address", back_populates="customer")
     login_logs = relationship("LoginLog", back_populates="customer")
@@ -42,7 +42,7 @@ class Company(Base):
 
     customers = relationship("Customer", secondary="Customer_Companies")
 
-class CustomerFeedback(Base):
+class Feedback(Base):
     __tablename__ = "Customer_Feedback"
 
     id_feedback = Column(Integer, primary_key=True, index=True)
@@ -93,7 +93,6 @@ class LoginLog(Base):
     id_customer = Column(Integer, ForeignKey("Customers.id_customer"), nullable=False)
 
     customer = relationship("Customer", back_populates="login_logs")
-
 
 class CustomerCompany(Base):
     __tablename__ = "Customer_Companies"

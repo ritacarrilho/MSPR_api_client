@@ -111,12 +111,47 @@ def delete_company(company_id: int, db: Session = Depends(get_db)):
 
 # ---------------------- Feedback Endpoints ---------------------- #
 
-@app.post("/feedbacks/", response_model=schemas.FeedbackCreate, tags=["Feedbacks"])
+@app.get("/feedbacks/", response_model=List[schemas.Feedback], tags=["Feedbacks"])
+def read_feedbacks(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    """
+    Récupère la liste des feedbacks.
+    """
+    feedbacks = controllers.get_feedbacks(db, skip=skip, limit=limit)
+    return feedbacks
+
+@app.get("/feedbacks/{feedback_id}", response_model=schemas.Feedback, tags=["Feedbacks"])
+def read_feedback(feedback_id: int, db: Session = Depends(get_db)):
+    """
+    Récupère un feedback par ID.
+    """
+    feedback = controllers.get_feedback_by_id(db, feedback_id)
+    if feedback is None:
+        raise HTTPException(status_code=404, detail="Feedback not found")
+    return feedback
+
+@app.post("/feedbacks/", response_model=schemas.Feedback, tags=["Feedbacks"])
 def create_feedback(feedback: schemas.FeedbackCreate, db: Session = Depends(get_db)):
     """
-    Crée un feedback pour un produit.
+    Crée un nouveau feedback.
     """
     return controllers.create_feedback(db, feedback)
+
+@app.patch("/feedbacks/{feedback_id}", response_model=schemas.Feedback, tags=["Feedbacks"])
+def update_feedback(feedback_id: int, feedback_update: schemas.FeedbackUpdate, db: Session = Depends(get_db)):
+    """
+    Met à jour un feedback existant.
+    """
+    return controllers.update_feedback(db, feedback_id, feedback_update)
+
+@app.delete("/feedbacks/{feedback_id}", tags=["Feedbacks"])
+def delete_feedback(feedback_id: int, db: Session = Depends(get_db)):
+    """
+    Supprime un feedback par ID.
+    """
+    deleted_feedback = controllers.delete_feedback(db, feedback_id)
+    if deleted_feedback is None:
+        raise HTTPException(status_code=404, detail="Feedback not found")
+    return {"message": "Feedback deleted successfully"}
 
 # ---------------------- Notification Endpoints ---------------------- #
 
