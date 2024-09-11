@@ -281,3 +281,78 @@ def delete_login_log(db: Session, log_id: int):
     db.delete(db_login_log)
     db.commit()
     return db_login_log
+
+# --------------------- CustomerCompany Controllers --------------------- #
+
+def get_customer_companies(db: Session, skip: int = 0, limit: int = 10):
+    """
+    Récupère toutes les relations entre clients et entreprises.
+    """
+    return db.query(models.CustomerCompany).offset(skip).limit(limit).all()
+
+def get_customer_company_by_ids(db: Session, customer_id: int, company_id: int):
+    """
+    Récupère une relation spécifique entre un client et une entreprise.
+    """
+    return db.query(models.CustomerCompany).filter(
+        models.CustomerCompany.id_customer == customer_id,
+        models.CustomerCompany.id_company == company_id
+    ).first()
+
+def create_customer_company(db: Session, customer_company: schemas.CustomerCompanyCreate):
+    """
+    Crée une nouvelle relation entre un client et une entreprise.
+    """
+    # Vérifier si la relation existe déjà
+    existing_relation = db.query(models.CustomerCompany).filter(
+        models.CustomerCompany.id_customer == customer_company.id_customer,
+        models.CustomerCompany.id_company == customer_company.id_company
+    ).first()
+    
+    if existing_relation:
+        raise HTTPException(status_code=400, detail="CustomerCompany relation already exists")
+
+    db_customer_company = models.CustomerCompany(
+        id_customer=customer_company.id_customer,
+        id_company=customer_company.id_company
+    )
+    db.add(db_customer_company)
+    db.commit()
+    db.refresh(db_customer_company)
+    return db_customer_company
+
+def update_customer_company(db: Session, customer_id: int, company_id: int, customer_company_update: schemas.CustomerCompanyUpdate):
+    """
+    Met à jour une relation existante entre un client et une entreprise.
+    """
+    db_customer_company = db.query(models.CustomerCompany).filter(
+        models.CustomerCompany.id_customer == customer_id,
+        models.CustomerCompany.id_company == company_id
+    ).first()
+    
+    if not db_customer_company:
+        raise HTTPException(status_code=404, detail="CustomerCompany not found")
+
+    # Update foreign keys if needed
+    db_customer_company.id_customer = customer_company_update.id_customer
+    db_customer_company.id_company = customer_company_update.id_company
+
+    db.commit()
+    db.refresh(db_customer_company)
+    return db_customer_company
+
+def delete_customer_company(db: Session, customer_id: int, company_id: int):
+    """
+    Supprime une relation entre un client et une entreprise.
+    """
+    db_customer_company = db.query(models.CustomerCompany).filter(
+        models.CustomerCompany.id_customer == customer_id,
+        models.CustomerCompany.id_company == company_id
+    ).first()
+    
+    if not db_customer_company:
+        return None
+
+    db.delete(db_customer_company)
+    db.commit()
+    return db_customer_company

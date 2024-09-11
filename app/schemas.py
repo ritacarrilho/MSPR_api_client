@@ -188,3 +188,23 @@ class LoginLog(LoginLogBase):
 
     class Config:
         orm_mode = True
+
+#
+
+class CustomerCompanyBase(BaseModel):
+    id_customer: int
+    id_company: int
+
+class CustomerCompanyCreate(CustomerCompanyBase):
+    pass
+
+class CustomerCompanyUpdate(BaseModel):
+    id_customer: int
+    id_company: int
+
+    class Config:
+        orm_mode = True
+
+class CustomerCompany(CustomerCompanyBase):
+    class Config:
+        orm_mode = True

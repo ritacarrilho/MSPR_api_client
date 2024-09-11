@@ -276,3 +276,46 @@ def delete_login_log(log_id: int, db: Session = Depends(get_db)):
     if db_login_log is None:
         raise HTTPException(status_code=404, detail="Login log not found")
     return db_login_log
+
+# ---------------------- CustomerCompany Endpoints ---------------------- #
+
+@app.get("/customer-companies/", response_model=List[schemas.CustomerCompany], tags=["CustomerCompanies"])
+def read_customer_companies(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    """
+    Récupère toutes les relations entre clients et entreprises.
+    """
+    return controllers.get_customer_companies(db, skip=skip, limit=limit)
+
+@app.get("/customer-companies/{customer_id}/{company_id}", response_model=schemas.CustomerCompany, tags=["CustomerCompanies"])
+def read_customer_company(customer_id: int, company_id: int, db: Session = Depends(get_db)):
+    """
+    Récupère une relation spécifique entre un client et une entreprise.
+    """
+    db_customer_company = controllers.get_customer_company_by_ids(db, customer_id, company_id)
+    if db_customer_company is None:
+        raise HTTPException(status_code=404, detail="CustomerCompany not found")
+    return db_customer_company
+
+@app.post("/customer-companies/", response_model=schemas.CustomerCompany, tags=["CustomerCompanies"])
+def create_customer_company(customer_company: schemas.CustomerCompanyCreate, db: Session = Depends(get_db)):
+    """
+    Crée une nouvelle relation entre un client et une entreprise.
+    """
+    return controllers.create_customer_company(db, customer_company)
+
+@app.patch("/customer-companies/{customer_id}/{company_id}", response_model=schemas.CustomerCompany, tags=["CustomerCompanies"])
+def update_customer_company(customer_id: int, company_id: int, customer_company_update: schemas.CustomerCompanyUpdate, db: Session = Depends(get_db)):
+    """
+    Met à jour une relation existante entre un client et une entreprise.
+    """
+    return controllers.update_customer_company(db, customer_id, company_id, customer_company_update)
+
+@app.delete("/customer-companies/{customer_id}/{company_id}", response_model=schemas.CustomerCompany, tags=["CustomerCompanies"])
+def delete_customer_company(customer_id: int, company_id: int, db: Session = Depends(get_db)):
+    """
+    Supprime une relation entre un client et une entreprise.
+    """
+    db_customer_company = controllers.delete_customer_company(db, customer_id, company_id)
+    if db_customer_company is None:
+        raise HTTPException(status_code=404, detail="CustomerCompany not found")
+    return db_customer_company
