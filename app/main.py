@@ -23,7 +23,7 @@ app = FastAPI(
 
 # ---------------------- Customer Endpoints ---------------------- #
 
-@app.get("/customers/", response_model=List[schemas.Customer])
+@app.get("/customers/", response_model=List[schemas.Customer], tags=["Customers"])
 def read_customers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     """
     Récupère la liste des clients.
@@ -31,7 +31,7 @@ def read_customers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)
     customers = controllers.get_customers(db)
     return customers
 
-@app.get("/customers/{customer_id}", response_model=schemas.Customer)
+@app.get("/customers/{customer_id}", response_model=schemas.Customer, tags=["Customers"])
 def read_customer(customer_id: int, db: Session = Depends(get_db)):
     """
     Récupère un client par ID.
@@ -41,21 +41,21 @@ def read_customer(customer_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
 
-@app.post("/customers/", response_model=schemas.Customer)
+@app.post("/customers/", response_model=schemas.Customer, tags=["Customers"])
 def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_db)):
     """
     Crée un nouveau client.
     """
     return controllers.create_customer(db, customer)
 
-@app.patch("/customers/{customer_id}", response_model=schemas.Customer)
+@app.patch("/customers/{customer_id}", response_model=schemas.Customer, tags=["Customers"])
 def update_customer(customer_id: int, customer_update: schemas.CustomerUpdate, db: Session = Depends(get_db)):
     """
     Met à jour un client existant.
     """
     return controllers.update_customer(db, customer_id, customer_update)
 
-@app.delete("/customers/{customer_id}")
+@app.delete("/customers/{customer_id}", tags=["Customers"])
 def delete_customer(customer_id: int, db: Session = Depends(get_db)):
     """
     Supprime un client par ID.
@@ -67,7 +67,7 @@ def delete_customer(customer_id: int, db: Session = Depends(get_db)):
 
 # ---------------------- Company Endpoints ---------------------- #
 
-@app.get("/companies/", response_model=List[schemas.Company])
+@app.get("/companies/", response_model=List[schemas.Company], tags=["Companies"])
 def read_companies(db: Session = Depends(get_db)):
     """
     Récupère la liste des entreprises.
@@ -75,7 +75,7 @@ def read_companies(db: Session = Depends(get_db)):
     companies = controllers.get_all_companies(db)
     return companies
 
-@app.get("/companies/{company_id}", response_model=schemas.Company)
+@app.get("/companies/{company_id}", response_model=schemas.Company, tags=["Companies"])
 def read_company(company_id: int, db: Session = Depends(get_db)):
     """
     Récupère une entreprise par ID.
@@ -85,21 +85,21 @@ def read_company(company_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Company not found")
     return company
 
-@app.post("/companies/", response_model=schemas.Company)
+@app.post("/companies/", response_model=schemas.Company, tags=["Companies"])
 def create_company(company: schemas.CompanyCreate, db: Session = Depends(get_db)):
     """
     Crée une nouvelle entreprise.
     """
     return controllers.create_company(db, company)
 
-@app.patch("/companies/{company_id}", response_model=schemas.Company)
+@app.patch("/companies/{company_id}", response_model=schemas.Company, tags=["Companies"])
 def update_company(company_id: int, company_update: schemas.CompanyUpdate, db: Session = Depends(get_db)):
     """
     Met à jour une entreprise existante.
     """
     return controllers.update_company(db, company_id, company_update)
 
-@app.delete("/companies/{company_id}")
+@app.delete("/companies/{company_id}", tags=["Companies"])
 def delete_company(company_id: int, db: Session = Depends(get_db)):
     """
     Supprime une entreprise par ID.
@@ -111,7 +111,7 @@ def delete_company(company_id: int, db: Session = Depends(get_db)):
 
 # ---------------------- Feedback Endpoints ---------------------- #
 
-@app.post("/feedbacks/", response_model=schemas.FeedbackCreate)
+@app.post("/feedbacks/", response_model=schemas.FeedbackCreate, tags=["Feedbacks"])
 def create_feedback(feedback: schemas.FeedbackCreate, db: Session = Depends(get_db)):
     """
     Crée un feedback pour un produit.
@@ -120,7 +120,7 @@ def create_feedback(feedback: schemas.FeedbackCreate, db: Session = Depends(get_
 
 # ---------------------- Notification Endpoints ---------------------- #
 
-@app.post("/notifications/", response_model=schemas.NotificationCreate)
+@app.post("/notifications/", response_model=schemas.NotificationCreate, tags=["Notifications"])
 def create_notification(notification: schemas.NotificationCreate, db: Session = Depends(get_db)):
     """
     Crée une notification pour un client.
