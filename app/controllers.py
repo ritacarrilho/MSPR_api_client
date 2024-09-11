@@ -245,3 +245,39 @@ def delete_address(db: Session, address_id: int):
     db.delete(db_address)
     db.commit()
     return db_address
+
+# --------------------- LoginLog Controllers --------------------- #
+
+def get_login_logs(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(models.LoginLog).offset(skip).limit(limit).all()
+
+def get_login_log_by_id(db: Session, log_id: int):
+    return db.query(models.LoginLog).filter(models.LoginLog.id_log == log_id).first()
+
+def create_login_log(db: Session, login_log: schemas.LoginLogCreate):
+    db_login_log = models.LoginLog(**login_log.dict())
+    db.add(db_login_log)
+    db.commit()
+    db.refresh(db_login_log)
+    return db_login_log
+
+def update_login_log(db: Session, log_id: int, login_log_update: schemas.LoginLogUpdate):
+    db_login_log = db.query(models.LoginLog).filter(models.LoginLog.id_log == log_id).first()
+    if not db_login_log:
+        raise HTTPException(status_code=404, detail="Login log not found")
+
+    for key, value in login_log_update.dict(exclude_unset=True).items():
+        setattr(db_login_log, key, value)
+
+    db.commit()
+    db.refresh(db_login_log)
+    return db_login_log
+
+def delete_login_log(db: Session, log_id: int):
+    db_login_log = db.query(models.LoginLog).filter(models.LoginLog.id_log == log_id).first()
+    if not db_login_log:
+        return None
+
+    db.delete(db_login_log)
+    db.commit()
+    return db_login_log

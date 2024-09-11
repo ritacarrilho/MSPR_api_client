@@ -245,3 +245,34 @@ def delete_address(address_id: int, db: Session = Depends(get_db)):
     if address is None:
         raise HTTPException(status_code=404, detail="Address not found")
     return address
+
+# ---------------------- LoginLog Endpoints ---------------------- #
+
+@app.get("/login-logs/", response_model=List[schemas.LoginLog], tags=["LoginLogs"])
+def read_login_logs(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    return controllers.get_login_logs(db, skip=skip, limit=limit)
+
+@app.get("/login-logs/{log_id}", response_model=schemas.LoginLog, tags=["LoginLogs"])
+def read_login_log(log_id: int, db: Session = Depends(get_db)):
+    db_login_log = controllers.get_login_log_by_id(db, log_id)
+    if db_login_log is None:
+        raise HTTPException(status_code=404, detail="Login log not found")
+    return db_login_log
+
+@app.post("/login-logs/", response_model=schemas.LoginLog, tags=["LoginLogs"])
+def create_login_log(login_log: schemas.LoginLogCreate, db: Session = Depends(get_db)):
+    return controllers.create_login_log(db, login_log)
+
+@app.patch("/login-logs/{log_id}", response_model=schemas.LoginLog, tags=["LoginLogs"])
+def update_login_log(log_id: int, login_log: schemas.LoginLogUpdate, db: Session = Depends(get_db)):
+    db_login_log = controllers.update_login_log(db, log_id, login_log)
+    if db_login_log is None:
+        raise HTTPException(status_code=404, detail="Login log not found")
+    return db_login_log
+
+@app.delete("/login-logs/{log_id}", response_model=schemas.LoginLog, tags=["LoginLogs"])
+def delete_login_log(log_id: int, db: Session = Depends(get_db)):
+    db_login_log = controllers.delete_login_log(db, log_id)
+    if db_login_log is None:
+        raise HTTPException(status_code=404, detail="Login log not found")
+    return db_login_log

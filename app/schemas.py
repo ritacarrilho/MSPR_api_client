@@ -166,3 +166,25 @@ class Address(AddressBase):
 
     class Config:
         orm_mode = True
+
+# 
+
+class LoginLogBase(BaseModel):
+    login_time: datetime
+    ip_address: str = None
+    user_agent: str = None
+    id_customer: int
+
+class LoginLogCreate(LoginLogBase):
+    pass
+
+class LoginLogUpdate(BaseModel):
+    login_time: datetime = None
+    ip_address: str = None
+    user_agent: str = None
+
+class LoginLog(LoginLogBase):
+    id_log: int
+
+    class Config:
+        orm_mode = True
