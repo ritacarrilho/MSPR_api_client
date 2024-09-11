@@ -1,32 +1,19 @@
--- phpMyAdmin SQL Dump
--- version 5.2.0
--- https://www.phpmyadmin.net/
---
--- Hôte : 127.0.0.1:3306
--- Généré le : lun. 09 sep. 2024 à 17:02
--- Version du serveur : 8.0.31
--- Version de PHP : 8.1.13
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
-
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
---
--- Base de données : `customer_db`
---
-
+-- --------------------------------------------------------
+-- Database: customer_db
 -- --------------------------------------------------------
 
---
--- Structure de la table `addresses`
---
-
+-- --------------------------------------------------------
+-- Table structure for `addresses`
+-- --------------------------------------------------------
 DROP TABLE IF EXISTS `addresses`;
 CREATE TABLE IF NOT EXISTS `addresses` (
   `id_address` int NOT NULL AUTO_INCREMENT,
@@ -44,20 +31,16 @@ CREATE TABLE IF NOT EXISTS `addresses` (
   KEY `id_customer` (`id_customer`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `addresses`
---
-
+-- --------------------------------------------------------
+-- Data for table `addresses`
+-- --------------------------------------------------------
 INSERT INTO `addresses` (`id_address`, `address_line1`, `address_line2`, `city`, `state`, `postal_code`, `country`, `address_type`, `created_at`, `updated_at`, `id_customer`) VALUES
 (1, '15 Rue des Lilas', NULL, 'Lyon', 'Auvergne-Rhône-Alpes', '69003', 'France', 1, '2024-09-09 19:02:12', NULL, 1),
 (2, '100 Avenue des Champs-Élysées', 'Apt. 12B', 'Paris', NULL, '75008', 'France', 2, '2024-09-09 19:02:12', NULL, 2);
 
 -- --------------------------------------------------------
-
---
--- Structure de la table `companies`
---
-
+-- Table structure for `companies`
+-- --------------------------------------------------------
 DROP TABLE IF EXISTS `companies`;
 CREATE TABLE IF NOT EXISTS `companies` (
   `id_company` int NOT NULL AUTO_INCREMENT,
@@ -73,20 +56,16 @@ CREATE TABLE IF NOT EXISTS `companies` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `companies`
---
-
+-- --------------------------------------------------------
+-- Data for table `companies`
+-- --------------------------------------------------------
 INSERT INTO `companies` (`id_company`, `company_name`, `siret`, `address`, `postal_code`, `city`, `phone`, `email`) VALUES
 (1, 'Coffee Distributors Inc.', '12345678901234', '10 Rue de la Paix', '75002', 'Paris', '0155567788', 'contact@coffee-distributors.com'),
 (2, 'Café Express SARL', '98765432109876', '5 Boulevard des Capucines', '75009', 'Paris', '0177889988', 'info@cafeexpress.fr');
 
 -- --------------------------------------------------------
-
---
--- Structure de la table `customers`
---
-
+-- Table structure for `customers`
+-- --------------------------------------------------------
 DROP TABLE IF EXISTS `customers`;
 CREATE TABLE IF NOT EXISTS `customers` (
   `id_customer` int NOT NULL AUTO_INCREMENT,
@@ -109,20 +88,16 @@ CREATE TABLE IF NOT EXISTS `customers` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `customers`
---
-
+-- --------------------------------------------------------
+-- Data for table `customers`
+-- --------------------------------------------------------
 INSERT INTO `customers` (`id_customer`, `name`, `created_at`, `updated_at`, `username`, `first_name`, `last_name`, `phone`, `email`, `password_hash`, `last_login`, `customer_type`, `failed_login_attempts`, `preferred_contact_method`, `opt_in_marketing`, `loyalty_points`) VALUES
 (1, 'CaféLover', '2024-09-09 19:02:12', NULL, 'cafefan123', 'Jean', 'Dupont', '0612345678', 'jean.dupont@example.com', 'hashedpassword123', '2024-09-09 19:02:12', 1, 0, 1, 1, 120),
 (2, 'ProBarista', '2024-09-09 19:02:12', NULL, 'barista_pro', 'Marie', 'Durand', '0698765432', 'marie.durand@procoffee.com', 'hashedpassword456', '2024-09-09 19:02:12', 2, 0, 2, 1, 300);
 
 -- --------------------------------------------------------
-
---
--- Structure de la table `customer_companies`
---
-
+-- Table structure for `customer_companies`
+-- --------------------------------------------------------
 DROP TABLE IF EXISTS `customer_companies`;
 CREATE TABLE IF NOT EXISTS `customer_companies` (
   `id_customer` int NOT NULL AUTO_INCREMENT,
@@ -131,20 +106,16 @@ CREATE TABLE IF NOT EXISTS `customer_companies` (
   KEY `id_company` (`id_company`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `customer_companies`
---
-
+-- --------------------------------------------------------
+-- Data for table `customer_companies`
+-- --------------------------------------------------------
 INSERT INTO `customer_companies` (`id_customer`, `id_company`) VALUES
 (2, 1),
 (2, 2);
 
 -- --------------------------------------------------------
-
---
--- Structure de la table `customer_feedback`
---
-
+-- Table structure for `customer_feedback`
+-- --------------------------------------------------------
 DROP TABLE IF EXISTS `customer_feedback`;
 CREATE TABLE IF NOT EXISTS `customer_feedback` (
   `id_feedback` int NOT NULL AUTO_INCREMENT,
@@ -157,20 +128,16 @@ CREATE TABLE IF NOT EXISTS `customer_feedback` (
   KEY `id_customer` (`id_customer`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `customer_feedback`
---
-
+-- --------------------------------------------------------
+-- Data for table `customer_feedback`
+-- --------------------------------------------------------
 INSERT INTO `customer_feedback` (`id_feedback`, `product_id`, `rating`, `comment`, `created_at`, `id_customer`) VALUES
 (1, 1, 5, 'Amazing coffee, will buy again!', '2024-09-09 19:02:12', 1),
 (2, 2, 4, 'Good quality but a bit pricey.', '2024-09-09 19:02:12', 2);
 
 -- --------------------------------------------------------
-
---
--- Structure de la table `login_logs`
---
-
+-- Table structure for `login_logs`
+-- --------------------------------------------------------
 DROP TABLE IF EXISTS `login_logs`;
 CREATE TABLE IF NOT EXISTS `login_logs` (
   `id_log` int NOT NULL AUTO_INCREMENT,
@@ -182,20 +149,16 @@ CREATE TABLE IF NOT EXISTS `login_logs` (
   KEY `id_customer` (`id_customer`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `login_logs`
---
-
+-- --------------------------------------------------------
+-- Data for table `login_logs`
+-- --------------------------------------------------------
 INSERT INTO `login_logs` (`id_log`, `login_time`, `ip_address`, `user_agent`, `id_customer`) VALUES
 (1, '2024-09-09 19:02:12', '192.168.1.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)', 1),
 (2, '2024-09-09 19:02:12', '192.168.1.2', 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)', 2);
 
 -- --------------------------------------------------------
-
---
--- Structure de la table `notifications`
---
-
+-- Table structure for `notifications`
+-- --------------------------------------------------------
 DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE IF NOT EXISTS `notifications` (
   `id_notification` int NOT NULL AUTO_INCREMENT,
@@ -208,15 +171,11 @@ CREATE TABLE IF NOT EXISTS `notifications` (
   KEY `id_customer` (`id_customer`)
 ) ENGINE=MyISAM AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Déchargement des données de la table `notifications`
---
-
+-- --------------------------------------------------------
+-- Data for table `notifications`
+-- --------------------------------------------------------
 INSERT INTO `notifications` (`id_notification`, `message`, `date_created`, `is_read`, `type`, `id_customer`) VALUES
 (1, 'Your order has been shipped!', '2024-09-09 19:02:12', 0, 1, 1),
 (2, 'New product available: Organic Arabica!', '2024-09-09 19:02:12', 1, 2, 2);
-COMMIT;
 
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+COMMIT;

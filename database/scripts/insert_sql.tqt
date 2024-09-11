@@ -5,8 +5,8 @@ VALUES
 
 INSERT INTO Companies (company_name, siret, address, postal_code, city, phone, email) 
 VALUES 
-('Coffee Distributors Inc.', '12345678901234', '10 Rue de la Paix', '75002', 'Paris', '0155567788', 'contact@coffee-distributors.com'),
-('Café Express SARL', '98765432109876', '5 Boulevard des Capucines', '75009', 'Paris', '0177889988', 'info@cafeexpress.fr');
+('Coffee Distributors Inc.', '12345678901234', '10 Rue de la Paix', '75002', 'Paris', '155567788', 'contact@coffee-distributors.com'),
+('Café Express SARL', '98765432109876', '5 Boulevard des Capucines', '75009', 'Paris', '177889988', 'info@cafeexpress.fr');
 
 INSERT INTO Customer_Feedback (product_id, rating, comment, created_at, id_customer) 
 VALUES 
