@@ -22,7 +22,7 @@ class Customer(Base):
     opt_in_marketing = Column(Boolean)
     loyalty_points = Column(Integer, nullable=False, default=0)
 
-    companies = relationship("Company", secondary="Customer_Companies")
+    companies = relationship("Company", secondary="Customer_Companies", back_populates="customers")
     feedbacks = relationship("Feedback", back_populates="customer")
     notifications = relationship("Notification", back_populates="customer")
     addresses = relationship("Address", back_populates="customer")

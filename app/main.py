@@ -155,9 +155,46 @@ def delete_feedback(feedback_id: int, db: Session = Depends(get_db)):
 
 # ---------------------- Notification Endpoints ---------------------- #
 
-@app.post("/notifications/", response_model=schemas.NotificationCreate, tags=["Notifications"])
+@app.get("/notifications/", response_model=List[schemas.Notification], tags=["Notifications"])
+def read_notifications(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    """
+    Récupère toutes les notifications.
+    """
+    return controllers.get_notifications(db, skip=skip, limit=limit)
+
+@app.get("/notifications/{notification_id}", response_model=schemas.Notification, tags=["Notifications"])
+def read_notification(notification_id: int, db: Session = Depends(get_db)):
+    """
+    Récupère une notification par ID.
+    """
+    notification = controllers.get_notification_by_id(db, notification_id)
+    if notification is None:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return notification
+
+@app.post("/notifications/", response_model=schemas.Notification, tags=["Notifications"])
 def create_notification(notification: schemas.NotificationCreate, db: Session = Depends(get_db)):
     """
     Crée une notification pour un client.
     """
     return controllers.create_notification(db, notification)
+
+@app.patch("/notifications/{notification_id}", response_model=schemas.Notification, tags=["Notifications"])
+def update_notification(notification_id: int, notification_update: schemas.NotificationUpdate, db: Session = Depends(get_db)):
+    """
+    Met à jour une notification par ID.
+    """
+    notification = controllers.update_notification(db, notification_id, notification_update)
+    if notification is None:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return notification
+
+@app.delete("/notifications/{notification_id}", response_model=schemas.Notification, tags=["Notifications"])
+def delete_notification(notification_id: int, db: Session = Depends(get_db)):
+    """
+    Supprime une notification par ID.
+    """
+    notification = controllers.delete_notification(db, notification_id)
+    if notification is None:
+        raise HTTPException(status_code=404, detail="Notification not found")
+    return notification

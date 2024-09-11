@@ -160,10 +160,13 @@ def delete_feedback(db: Session, feedback_id: int):
 
 # --------------------- Notification Controllers --------------------- #
 
+def get_notifications(db: Session, skip: int = 0, limit: int = 10):
+    return db.query(models.Notification).offset(skip).limit(limit).all()
+
+def get_notification_by_id(db: Session, notification_id: int):
+    return db.query(models.Notification).filter(models.Notification.id_notification == notification_id).first()
+
 def create_notification(db: Session, notification: schemas.NotificationCreate):
-    """
-    Crée une notification pour un client.
-    """
     db_notification = models.Notification(
         message=notification.message,
         date_created=notification.date_created,
@@ -174,4 +177,20 @@ def create_notification(db: Session, notification: schemas.NotificationCreate):
     db.add(db_notification)
     db.commit()
     db.refresh(db_notification)
+    return db_notification
+
+def update_notification(db: Session, notification_id: int, notification_update: schemas.NotificationUpdate):
+    db_notification = db.query(models.Notification).filter(models.Notification.id_notification == notification_id).first()
+    if db_notification:
+        for key, value in notification_update.dict(exclude_unset=True).items():
+            setattr(db_notification, key, value)
+        db.commit()
+        db.refresh(db_notification)
+    return db_notification
+
+def delete_notification(db: Session, notification_id: int):
+    db_notification = db.query(models.Notification).filter(models.Notification.id_notification == notification_id).first()
+    if db_notification:
+        db.delete(db_notification)
+        db.commit()
     return db_notification

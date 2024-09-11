@@ -116,12 +116,20 @@ class Feedback(FeedbackBase):
 # Schéma pour Notification
 class NotificationBase(BaseModel):
     message: str
-    date_created: datetime
+    date_created: Optional[datetime] = None
     is_read: Optional[bool] = False
     type: int
+    id_customer: int
 
 class NotificationCreate(NotificationBase):
-    id_customer: int
+    pass
+
+class NotificationUpdate(BaseModel):
+    message: Optional[str] = None
+    date_created: Optional[datetime] = None
+    is_read: Optional[bool] = None
+    type: Optional[int] = None
+    id_customer: Optional[int] = None
 
 class Notification(NotificationBase):
     id_notification: int
