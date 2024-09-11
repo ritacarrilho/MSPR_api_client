@@ -194,3 +194,54 @@ def delete_notification(db: Session, notification_id: int):
         db.delete(db_notification)
         db.commit()
     return db_notification
+
+# --------------------- Address Controllers --------------------- #
+
+def get_addresses(db: Session, skip: int = 0, limit: int = 10):
+    """
+    Récupère toutes les adresses.
+    """
+    return db.query(models.Address).offset(skip).limit(limit).all()
+
+def get_address_by_id(db: Session, address_id: int):
+    """
+    Récupère une adresse par ID.
+    """
+    return db.query(models.Address).filter(models.Address.id_address == address_id).first()
+
+def create_address(db: Session, address: schemas.AddressCreate):
+    """
+    Crée une nouvelle adresse.
+    """
+    db_address = models.Address(**address.dict())
+    db.add(db_address)
+    db.commit()
+    db.refresh(db_address)
+    return db_address
+
+def update_address(db: Session, address_id: int, address_update: schemas.AddressUpdate):
+    """
+    Met à jour une adresse existante.
+    """
+    db_address = get_address_by_id(db, address_id)
+    if not db_address:
+        raise HTTPException(status_code=404, detail="Address not found")
+
+    for key, value in address_update.dict(exclude_unset=True).items():
+        setattr(db_address, key, value)
+
+    db.commit()
+    db.refresh(db_address)
+    return db_address
+
+def delete_address(db: Session, address_id: int):
+    """
+    Supprime une adresse par ID.
+    """
+    db_address = get_address_by_id(db, address_id)
+    if not db_address:
+        return None
+
+    db.delete(db_address)
+    db.commit()
+    return db_address

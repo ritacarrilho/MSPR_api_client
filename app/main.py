@@ -198,3 +198,50 @@ def delete_notification(notification_id: int, db: Session = Depends(get_db)):
     if notification is None:
         raise HTTPException(status_code=404, detail="Notification not found")
     return notification
+
+# ---------------------- Address Endpoints ---------------------- #
+
+
+@app.get("/addresses/", response_model=List[schemas.Address], tags=["Addresses"])
+def get_addresses(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    """
+    Récupère toutes les adresses.
+    """
+    return controllers.get_addresses(db, skip=skip, limit=limit)
+
+@app.post("/addresses/", response_model=schemas.Address, tags=["Addresses"])
+def create_address(address: schemas.AddressCreate, db: Session = Depends(get_db)):
+    """
+    Crée une nouvelle adresse.
+    """
+    return controllers.create_address(db, address)
+
+@app.get("/addresses/{address_id}", response_model=schemas.Address, tags=["Addresses"])
+def get_address(address_id: int, db: Session = Depends(get_db)):
+    """
+    Récupère une adresse par ID.
+    """
+    address = controllers.get_address_by_id(db, address_id)
+    if address is None:
+        raise HTTPException(status_code=404, detail="Address not found")
+    return address
+
+@app.patch("/addresses/{address_id}", response_model=schemas.Address, tags=["Addresses"])
+def update_address(address_id: int, address_update: schemas.AddressUpdate, db: Session = Depends(get_db)):
+    """
+    Met à jour une adresse par ID.
+    """
+    address = controllers.update_address(db, address_id, address_update)
+    if address is None:
+        raise HTTPException(status_code=404, detail="Address not found")
+    return address
+
+@app.delete("/addresses/{address_id}", response_model=schemas.Address, tags=["Addresses"])
+def delete_address(address_id: int, db: Session = Depends(get_db)):
+    """
+    Supprime une adresse par ID.
+    """
+    address = controllers.delete_address(db, address_id)
+    if address is None:
+        raise HTTPException(status_code=404, detail="Address not found")
+    return address
