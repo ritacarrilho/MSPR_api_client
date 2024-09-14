@@ -143,3 +143,28 @@ fastapi dev main.py
 ```java
 find . -name .DS_Store -print0 | xargs -0 git rm -f --ignore-unmatch
 ```
+## Tests
+Librairie utilisé : [unittest](https://docs.python.org/3/library/unittest.html)
+```python
+pip install fastapi requests sqlalchemy
+```
+
+Exécuter les tests : 
+```python
+python -m unittest tests/test_api.py
+```
+### Tests unitaires et d'intégration
+
+![](/assets/run-test.png)
+
+#### Rapport de test en format XML
+```python
+pytest --junitxml=report.xml
+```
+#### Rapport de test en format HTML
+```python
+coverage run -m unittest discover
+coverage report
+coverage html
+```
+![](/assets/coverage.png)
