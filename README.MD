@@ -157,6 +157,20 @@ python -m unittest tests/test_api.py
 
 ![](/assets/run-test.png)
 
+| **Test**                                | **Description**                                                                                   | **Type**        |
+|-----------------------------------------|---------------------------------------------------------------------------------------------------|-----------------|
+| `test_database_connection`              | Teste la connexion à la base de données.                                                         | Unitaire        |
+| `test_table_customers_exists`           | Vérifie que la table `Customers` existe dans la base de données de test.                          | Unitaire        |
+| `test_table_addresses_exists`           | Vérifie que la table `Addresses` existe dans la base de données de test.                          | Unitaire        |
+| `test_table_companies_exists`           | Vérifie que la table `Companies` existe dans la base de données de test.                          | Unitaire        |
+| `test_insert_into_customers`             | Teste l'insertion d'un client dans la table `Customers`.                                          | Intégration        |
+| `test_insert_into_addresses`             | Teste l'insertion d'une adresse dans la table `Addresses`.                                        | Intégration        |
+| `test_insert_into_companies`             | Teste l'insertion d'une entreprise dans la table `Companies`.                                     | Intégration        |
+| `test_read_from_customers`               | Teste la lecture des données insérées dans la table `Customers`.                                  | Unitaire        |
+| `test_update_customers`                  | Teste la mise à jour d'un client dans la table `Customers`.                                       | Intégration        |
+| `test_delete_from_customers`             | Teste la suppression d'un client dans la table `Customers`.                                       | Intégration        |
+| `test_read_from_addresses`               | Teste la lecture des données insérées dans la table `Addresses`.                                  | Unitaire        |
+
 #### Rapport de test en format XML
 ```python
 pytest --junitxml=report.xml
