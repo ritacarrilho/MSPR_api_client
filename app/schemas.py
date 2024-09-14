@@ -147,6 +147,7 @@ class AddressBase(BaseModel):
     address_type: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+    id_customer: int
 
 class AddressCreate(AddressBase):
     pass
@@ -167,7 +168,6 @@ class Address(AddressBase):
     class Config:
         orm_mode = True
 
-# 
 
 class LoginLogBase(BaseModel):
     login_time: datetime

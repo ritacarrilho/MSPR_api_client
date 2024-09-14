@@ -209,13 +209,6 @@ def get_addresses(skip: int = 0, limit: int = 10, db: Session = Depends(get_db))
     """
     return controllers.get_addresses(db, skip=skip, limit=limit)
 
-@app.post("/addresses/", response_model=schemas.Address, tags=["Addresses"])
-def create_address(address: schemas.AddressCreate, db: Session = Depends(get_db)):
-    """
-    Crée une nouvelle adresse.
-    """
-    return controllers.create_address(db, address)
-
 @app.get("/addresses/{address_id}", response_model=schemas.Address, tags=["Addresses"])
 def get_address(address_id: int, db: Session = Depends(get_db)):
     """
@@ -225,6 +218,13 @@ def get_address(address_id: int, db: Session = Depends(get_db)):
     if address is None:
         raise HTTPException(status_code=404, detail="Address not found")
     return address
+
+@app.post("/addresses/", response_model=schemas.Address, tags=["Addresses"])
+def create_address(address: schemas.AddressCreate, db: Session = Depends(get_db)):
+    """
+    Crée une nouvelle adresse.
+    """
+    return controllers.create_address(db, address)
 
 @app.patch("/addresses/{address_id}", response_model=schemas.Address, tags=["Addresses"])
 def update_address(address_id: int, address_update: schemas.AddressUpdate, db: Session = Depends(get_db)):
