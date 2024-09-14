@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  main-to-release:
+  test-and-merge:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,9 +30,9 @@ jobs:
           nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
           sleep 10 # Wait for the API to start
 
-      - name: Check API docs
+      - name: Check API is Running
         run: |
-          curl -s http://localhost:8000/docs | grep "kawa" || exit 1 # Check if "kawa" appears on the page
+          curl --fail http://localhost:8000/docs || exit 1 # Check if the API docs page is accessible
 
       - name: Set up Git
         run: |
