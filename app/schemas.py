@@ -160,7 +160,7 @@ class AddressUpdate(BaseModel):
     postal_code: Optional[str] = None
     country: Optional[str] = None
     address_type: Optional[int] = None
-    updated_at: datetime
+    updated_at: Optional[datetime] = None
 
 class Address(AddressBase):
     id_address: int
