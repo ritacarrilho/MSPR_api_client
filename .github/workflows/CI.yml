@@ -1,4 +1,4 @@
-name: Merge Main to Release
+name: CI/CD Pipeline
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.9' # Change to your Python version
+          python-version: '3.12.4'
 
       - name: Install dependencies
         run: |
@@ -24,17 +24,18 @@ jobs:
 
       - name: Start API
         run: |
-          nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          cd app
+          nohup fastapi dev main.py --host 0.0.0.0 --port 8000 &
           sleep 10 # Wait for the API to start
 
       - name: Check API health
         run: |
-          curl --fail http://localhost:8000/health || exit 1
+          curl --fail http://127.0.0.1:8000/docs || exit 1 # Check if the API docs are accessible
 
       - name: Set up Git
         run: |
-          git config --global user.name "GitHub Actions"
-          git config --global user.email "actions@github.com"
+          git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config --global user.name "${{ secrets.GIT_USER_NAME }}"
 
       - name: Fetch all branches
         run: git fetch --all
