@@ -1,4 +1,5 @@
-## Kawa Products API 
+## Kawa Products API
+![](/assets/payetonkawaBanner.png)
 
 ## Participants 👥
 - BILLARD Mélissa
