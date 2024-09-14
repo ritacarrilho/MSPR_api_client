@@ -21,7 +21,7 @@ app = FastAPI(
 #     except Exception as e:
 #         return {"status": "error", "details": str(e)}
 
-# ---------------------- Customer Endpoints ---------------------- #
+# ---------------------- Customers Endpoints ---------------------- #
 
 @app.get("/customers/", response_model=List[schemas.Customer], tags=["Customers"])
 def read_customers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
@@ -153,7 +153,7 @@ def delete_feedback(feedback_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Feedback not found")
     return {"message": "Feedback deleted successfully"}
 
-# ---------------------- Notification Endpoints ---------------------- #
+# ---------------------- Notifications Endpoints ---------------------- #
 
 @app.get("/notifications/", response_model=List[schemas.Notification], tags=["Notifications"])
 def read_notifications(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
@@ -199,8 +199,7 @@ def delete_notification(notification_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Notification not found")
     return notification
 
-# ---------------------- Address Endpoints ---------------------- #
-
+# ---------------------- Addresses Endpoints ---------------------- #
 
 @app.get("/addresses/", response_model=List[schemas.Address], tags=["Addresses"])
 def get_addresses(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
