@@ -78,7 +78,7 @@ https://615f5fb4f7254d0017068109.mockapi.io/api/v1/customers
 - **id_customer (INT, NOT NULL)** : Référence au client ayant laissé le retour.
 - **FOREIGN KEY(id_customer)** : Clé étrangère qui référence `id_customer` dans la table `Customers`.
 
-### Table `Notifications`
+#### Table `Notifications`
 - **id_notification (INT, AUTO_INCREMENT, clé primaire)** : Identifiant unique pour chaque notification.
 - **message (VARCHAR(255), NOT NULL)** : Message de la notification.
 - **date_created (DATETIME)** : Date et heure de création de la notification.
@@ -87,7 +87,7 @@ https://615f5fb4f7254d0017068109.mockapi.io/api/v1/customers
 - **id_customer (INT, NOT NULL)** : Référence au client concerné par la notification.
 - **FOREIGN KEY(id_customer)** : Clé étrangère qui référence `id_customer` dans la table `Customers`.
 
-### Table `Addresses`
+#### Table `Addresses`
 - **id_address (INT, AUTO_INCREMENT, clé primaire)** : Identifiant unique pour chaque adresse.
 - **address_line1 (VARCHAR(255), NOT NULL)** : Première ligne de l'adresse.
 - **address_line2 (VARCHAR(255))** : Deuxième ligne de l'adresse (optionnelle).
@@ -101,7 +101,7 @@ https://615f5fb4f7254d0017068109.mockapi.io/api/v1/customers
 - **id_customer (INT, NOT NULL)** : Référence au client associé à l'adresse.
 - **FOREIGN KEY(id_customer)** : Clé étrangère qui référence `id_customer` dans la table `Customers`.
 
-### Table `Login_Logs`
+#### Table `Login_Logs`
 - **id_log (INT, AUTO_INCREMENT, clé primaire)** : Identifiant unique pour chaque log de connexion.
 - **login_time (DATETIME, NOT NULL)** : Date et heure de la connexion.
 - **ip_address (VARCHAR(45))** : Adresse IP de l'utilisateur lors de la connexion.
@@ -109,7 +109,7 @@ https://615f5fb4f7254d0017068109.mockapi.io/api/v1/customers
 - **id_customer (INT, NOT NULL)** : Référence au client ayant effectué la connexion.
 - **FOREIGN KEY(id_customer)** : Clé étrangère qui référence `id_customer` dans la table `Customers`.
 
-### Table `Customer_Companies`
+#### Table `Customer_Companies`
 - **id_customer (INT, NOT NULL)** : Référence au client.
 - **id_company (INT, NOT NULL)** : Référence à l'entreprise.
 - **PRIMARY KEY(id_customer, id_company)** : Clé primaire composite qui assure l'unicité des paires client-entreprise.
