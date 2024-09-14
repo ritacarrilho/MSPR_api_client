@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  test-and-merge:
+  main-to-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,13 +21,14 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
+          pip install fastapi[standard]
+          pip install uvicorn
 
       - name: Start API
         run: |
           cd app
-          fastapi dev main.py --host 0.0.0.0 --port 8000 &
-          # Wait for the API to start
-          sleep 10
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10 # Wait for the API to start
 
       - name: Check API docs
         run: |
