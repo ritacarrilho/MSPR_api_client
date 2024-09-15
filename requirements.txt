@@ -8,3 +8,5 @@ pymysql
 mysql-connector-python
 sqlalchemy
 sqlalchemy-utils
+pika
+aio_pika
