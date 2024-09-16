@@ -28,16 +28,7 @@ jobs:
         run: |
           cd app  # Changer le répertoire vers app
           nohup fastapi dev main.py &  # Lancer l'API avec fastapi dev
-          sleep 20  # Attendre que l'API soit disponible
-
-      - name: Show FastAPI Logs
-        run: cat nohup.out
-
-      - name: List running processes
-        run: ps aux
-
-      - name: Check open ports
-        run: netstat -tuln
+          sleep 30  # Attendre que l'API soit disponible
 
       - name: Check API is Running
         run: |
