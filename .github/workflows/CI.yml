@@ -6,12 +6,20 @@ on:
       - main
 
 jobs:
-  test-and-merge:
+  CI_CD_Pipeline:
+    name: CI/CD Pipeline
     runs-on: ubuntu-latest
 
     steps:
+      - name: Initialize Git User
+        run: |
+          git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config --global user.name "${{ secrets.GIT_USER_NAME }}"
+
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -26,6 +34,39 @@ jobs:
 
       - name: Start API
         run: |
-          cd app  # Changer le répertoire vers app
-          nohup fastapi dev main.py &  # Lancer l'API avec fastapi dev
-          sleep 30  # Attendre que l'API soit disponible
+          cd app
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+
+      - name: Wait for API to be available
+        run: |
+          for i in {1..10}; do
+            if curl -s http://localhost:8000/; then
+              echo "API is up!"
+              exit 0
+            fi
+            echo "Waiting for API to be available..."
+            sleep 5
+          done
+          exit 1  # Échoue le job si l'API n'est pas disponible
+
+      - name: Checkout release branch with token
+        if: success()  # Si l'API est disponible
+        uses: actions/checkout@v3
+        with:
+          ref: release
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Merge main into release
+        if: success()  # Si l'API est disponible
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          echo "Merging main into release"
+          git fetch origin main
+          git checkout -B release origin/main
+          git push --force https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }} release
+          echo "Merge et push forcé de la branche main vers release validé"
+
+      - name: Check test failure
+        if: failure()  # Si une étape précédente a échoué
+        run: echo "Échec du test ou du démarrage de l'API !"
