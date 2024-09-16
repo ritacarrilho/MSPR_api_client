@@ -26,28 +26,19 @@ jobs:
 
       - name: Start API
         run: |
-          cd app
-          nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-          sleep 10 # Wait for the API to start
+          cd app  # Changer le répertoire vers app
+          nohup fastapi dev main.py &  # Lancer l'API avec fastapi dev
+          sleep 20  # Attendre que l'API soit disponible
+
+      - name: Show FastAPI Logs
+        run: cat nohup.out
+
+      - name: List running processes
+        run: ps aux
+
+      - name: Check open ports
+        run: netstat -tuln
 
       - name: Check API is Running
         run: |
-          curl --fail http://localhost:8000/docs || exit 1 # Check if the API docs page is accessible
-
-      - name: Run Tests
-        run: |
-          pytest # Or specify your test suite if needed
-
-      - name: Set up Git
-        run: |
-          git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
-          git config --global user.name "${{ secrets.GIT_USER_NAME }}"
-
-      - name: Fetch all branches
-        run: git fetch --all
-
-      - name: Merge main into release
-        run: |
-          git checkout release
-          git merge main --no-edit
-          git push origin release
+          curl --fail http://localhost:8000/docs || exit 1
