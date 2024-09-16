@@ -35,7 +35,9 @@ jobs:
       - name: Start API
         run: |
           cd app
-          nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+          # nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+          nohup fastapi dev main.py &  # Lancer l'API avec fastapi dev
+          sleep 30  # Attendre que l'API soit disponible
 
       - name: Wait for API to be available
         run: |
