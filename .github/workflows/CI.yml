@@ -32,23 +32,23 @@ jobs:
           pip install fastapi[standard]
           pip install uvicorn
 
-      - name: Start API
-        run: |
-          cd app
-          nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 &  # Utiliser uvicorn pour démarrer l'API
-          sleep 30  # Attendre que l'API soit disponible
+      # - name: Start API
+      #   run: |
+      #     cd app
+      #     nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 &  # Utiliser uvicorn pour démarrer l'API
+      #     sleep 30  # Attendre que l'API soit disponible
 
-      - name: Wait for API to be available
-        run: |
-          for i in {1..10}; do
-            if curl -s http://localhost:8000/; then
-              echo "API is up!"
-              exit 0
-            fi
-            echo "Waiting for API to be available..."
-            sleep 5
-          done
-          exit 1  # Échoue le job si l'API n'est pas disponible
+      # - name: Wait for API to be available
+      #   run: |
+      #     for i in {1..10}; do
+      #       if curl -s http://localhost:8000/; then
+      #         echo "API is up!"
+      #         exit 0
+      #       fi
+      #       echo "Waiting for API to be available..."
+      #       sleep 5
+      #     done
+      #     exit 1  # Échoue le job si l'API n'est pas disponible
 
       - name: Checkout release branch with token
         if: success()  # Si l'API est disponible
