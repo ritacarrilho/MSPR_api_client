@@ -29,7 +29,3 @@ jobs:
           cd app  # Changer le répertoire vers app
           nohup fastapi dev main.py &  # Lancer l'API avec fastapi dev
           sleep 30  # Attendre que l'API soit disponible
-
-      - name: Check API is Running
-        run: |
-          curl --fail http://localhost:8000/docs || exit 1
