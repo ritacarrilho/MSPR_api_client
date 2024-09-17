@@ -4,7 +4,7 @@ from typing import List
 import threading
 from . import models, schemas, controllers
 from .database import get_db
-from .messaging.service import fetch_customer_orders
+from .messaging.service import fetch_customer_orders, fetch_order_products
 
 # Initialisation de l'application FastAPI
 app = FastAPI(
@@ -323,7 +323,7 @@ def delete_customer_company(customer_id: int, company_id: int, db: Session = Dep
     return db_customer_company
 
 
-@app.get("/customers/{customer_id}/orders")
+@app.get("/customers/{customer_id}/orders", tags=["CustomerOrdersProducts"])
 async def get_customer_orders(customer_id: int):
     """API endpoint to get a customer's orders."""
     try:
@@ -337,3 +337,18 @@ async def get_customer_orders(customer_id: int):
         raise HTTPException(status_code=504, detail="Request to order service timed out")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch customer orders: {str(e)}")
+    
+
+@app.get("/customers/{customer_id}/orders/{order_id}/products")
+async def get_customer_order_products(customer_id: int, order_id: int):
+    """Fetch products for a specific order of a customer."""
+    try:
+        products = await fetch_order_products(customer_id, order_id)
+        print(f"Response products: {products}")
+        if not products:
+            raise HTTPException(status_code=404, detail="No products found for this order.")
+        return {"customer_id": customer_id, "order_id": order_id, "products": products}
+    except TimeoutError:
+        raise HTTPException(status_code=504, detail="Request timed out.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch products for order: {str(e)}")
