@@ -2,6 +2,7 @@ import pika
 import os
 import logging
 import time
+import aio_pika
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -16,6 +17,18 @@ RETRY_DELAY = 5
 MAX_RETRIES = 5
 
 logging.basicConfig(level=logging.INFO)
+
+# Utility function to establish RabbitMQ connection
+async def establish_rabbitmq_connection():
+    try:
+        connection = await aio_pika.connect_robust(
+            f"amqp://{BROKER_USER}:{BROKER_PASSWORD}@{BROKER_HOST}/"
+        )
+        logging.info("Connected to RabbitMQ")
+        return connection
+    except Exception as e:
+        logging.error(f"Failed to establish RabbitMQ connection: {str(e)}")
+        raise
 
 def get_rabbitmq_connection(retries=5, delay=5):
     """Attempts to connect to RabbitMQ with retry logic."""
