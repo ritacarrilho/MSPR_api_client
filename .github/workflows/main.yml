@@ -41,7 +41,7 @@ jobs:
 
       - name: Check Docker container logs
         run: |
-          docker-compose logs kawa-orders-app
+          docker-compose logs kawa-customers-app
 
       - name: Verify Docker containers are running
         run: |
