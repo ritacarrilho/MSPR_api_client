@@ -231,3 +231,20 @@ class CustomerOrdersResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class OrderProductSchema(BaseModel):
+    productId: int
+    quantity: int
+
+    class Config:
+        orm_mode = True
+
+class CustomerOrderProductResponse(BaseModel):
+    customer_id: int
+    order_id: int
+    order_status: int
+    products: List[OrderProductSchema]
+
+    class Config:
+        orm_mode = True

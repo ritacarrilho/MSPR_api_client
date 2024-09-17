@@ -1,11 +1,10 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
+from typing import List
+import threading
 from . import models, schemas, controllers
 from .database import get_db
-from app.services.customer_orders_service import get_customer_orders
-from typing import List
-import pika
-import time
+from .messaging.service import fetch_customer_orders
 
 # Initialisation de l'application FastAPI
 app = FastAPI(
@@ -15,26 +14,6 @@ app = FastAPI(
     version="0.0.2",
 )
 
-def callback(ch, method, properties, body):
-    print(f" [x] Received {body.decode()}")
-    time.sleep(body.count(b'.'))
-    print(" [x] Done")
-    ch.basic_ack(delivery_tag=method.delivery_tag)
-
-# try:
-#     # Connection parameters
-#     credentials = pika.PlainCredentials('user', 'password')
-#     connection = pika.BlockingConnection(pika.ConnectionParameters('rabbitmq', 5672, '/', credentials))
-#     channel = connection.channel()
-
-#     channel.queue_declare(queue='order_queue_test', durable=True)
-#     print(' [*] Waiting for messages. To exit press CTRL+C')
-#     channel.basic_qos(prefetch_count=1)
-#     channel.basic_consume(queue='order_queue_test', on_message_callback=callback)
-
-#     channel.start_consuming()
-# except Exception as e:
-#     print(f"Error setting up RabbitMQ: {e}")
 
 # @app.get("/test_db_connection/")
 # def test_db_connection(db: Session = Depends(get_db)):
@@ -344,13 +323,17 @@ def delete_customer_company(customer_id: int, company_id: int, db: Session = Dep
     return db_customer_company
 
 
-@app.get("/customers/{customer_id}/orders", response_model=schemas.CustomerOrdersResponse, tags=["CustomerOrders"])
-async def fetch_customer_orders(customer_id: int):
+@app.get("/customers/{customer_id}/orders")
+async def get_customer_orders(customer_id: int):
+    """API endpoint to get a customer's orders."""
     try:
-        orders = await get_customer_orders(customer_id)
+        orders = await fetch_customer_orders(customer_id)
         print(orders)
         if orders:
-            return schemas.CustomerOrdersResponse(customer_id=customer_id, orders=orders)
-        raise HTTPException(status_code=404, detail="No orders found for this customer")
+            return {"customer_id": customer_id, "orders": orders}
+        else:
+            raise HTTPException(status_code=404, detail="No orders found for this customer")
+    except TimeoutError:
+        raise HTTPException(status_code=504, detail="Request to order service timed out")
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Failed to fetch customer orders")
+        raise HTTPException(status_code=500, detail=f"Failed to fetch customer orders: {str(e)}")
