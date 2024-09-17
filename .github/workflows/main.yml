@@ -1,0 +1,152 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main # Déclenché à chaque nouveau commit sur le main
+
+jobs:
+  CI_CD_Pipeline:
+    name: CI/CD Pipeline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Initialize Git User
+        run: |
+          git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config --global user.name "${{ secrets.GIT_USER_NAME }}"
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Build Docker images
+        run: |
+          docker-compose build
+
+      - name: Start Docker containers
+        run: |
+          docker-compose up -d
+          sleep 60
+
+      - name: Check Docker container logs
+        run: |
+          docker-compose logs kawa-orders-app
+
+      - name: Verify Docker containers are running
+        run: |
+          docker ps
+
+          if ! docker ps | grep kawa-customers-app; then
+            echo "Le conteneur n'est pas en cours d'exécution !"
+            exit 1
+          fi
+
+          if ! nc -zv localhost 8081; then
+            echo "Le port 8081 sur le conteneur n'est pas accessible !"
+            exit 1
+          fi
+        continue-on-error: true
+
+      - name: Run unit tests
+        run: |
+          # Installer les dépendances nécessaires pour exécuter les tests
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+          # Exécuter les tests avec unittest
+          python -m unittest discover -s tests -p "test_api.py"
+        continue-on-error: true
+
+        # Builder et pousser l'image Docker après la vérification des conteneurs
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest .
+
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
+
+      - name: Checkout release branch with token
+        if: success()
+        uses: actions/checkout@v3
+        with:
+          ref: release
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Update version in files on main
+        if: success()
+        run: |
+          VERSION=$(date +"%Y.%m.%d")-$(git rev-parse --short HEAD)
+          echo "Updating version to $VERSION"
+          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
+
+      - name: Commit updated package.json on main
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          git checkout main || git checkout -b main origin/main
+          git add package.json
+          VERSION=$(date +"%Y.%m.%d")-$(git rev-parse --short HEAD)
+          echo "Updating version to $VERSION"
+          git commit -m "Update version to $VERSION [skip ci]"
+          git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }} main
+        
+      - name: Checkout release branch with token
+        if: success()
+        uses: actions/checkout@v3
+        with:
+          ref: release
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Merge main into release
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          git fetch origin main
+          git checkout -B release origin/main
+          git push --force https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }} release
+
+      - name: Send Discord notification on failure
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          STEP_NAME=${{ github.job }}
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "content": "<@&ROLE_ID> **Pipeline Failure - API CUSTOMER**\n\n**Repository:** ${{ github.repository }}\n**Commit SHA:** ${{ github.sha }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Failed Step:** '"${STEP_NAME}"'"
+          }' $DISCORD_WEBHOOK_URL
+
+      - name: Send Discord release notes on success
+        if: success()  # Si toutes les étapes précédentes sont réussies
+        env:
+          DISCORD_WEBHOOK_URL_RELEASE: ${{ secrets.DISCORD_WEBHOOK_URL_RELEASE }}
+        run: |
+          # Récupérer les informations du dernier commit
+          COMMIT_SHA=$(git rev-parse HEAD)
+          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
+          COMMIT_DATE=$(git log -1 --pretty=format:'%ad' --date=format:'%Y-%m-%d')
+          COMMIT_TIME=$(git log -1 --pretty=format:'%ad' --date=format:'%H:%M')
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+      
+          # Vérification temporaire de l'URL webhook
+          echo "Discord webhook URL: $DISCORD_WEBHOOK_URL_RELEASE"
+      
+          # Envoyer les informations sur Discord
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "content": "**Release Notes - API CUSTOMER**\n\n**Commit N°**: '"${COMMIT_SHA}"'\n**Auteur du commit**: '"${COMMIT_AUTHOR}"'\n**Date du commit**: '"${COMMIT_DATE}"'\n**Heure du commit**: '"${COMMIT_TIME}"'\n**Description commit**: '"${COMMIT_MESSAGE}"'"
+          }' "$DISCORD_WEBHOOK_URL_RELEASE"
+
