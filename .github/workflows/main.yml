@@ -30,6 +30,10 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
           docker-compose --version
 
+      - name: Create shared Docker network
+        run: |
+          docker network ls | grep kawa-shared-network || docker network create kawa-shared-network
+
       - name: Build Docker images
         run: |
           docker-compose build
@@ -41,19 +45,19 @@ jobs:
 
       - name: Check Docker container logs
         run: |
-          docker-compose logs kawa-customers-app
+          docker-compose logs ${{ secrets.DOCKER_CONTAINER }}
 
       - name: Verify Docker containers are running
         run: |
           docker ps
 
-          if ! docker ps | grep kawa-customers-app; then
+          if ! docker ps | grep ${{ secrets.DOCKER_CONTAINER }}; then
             echo "Le conteneur n'est pas en cours d'exécution !"
             exit 1
           fi
 
-          if ! nc -zv localhost 8081; then
-            echo "Le port 8081 sur le conteneur n'est pas accessible !"
+          if ! nc -zv localhost 8082; then
+            echo "Le port du conteneur n'est pas accessible !"
             exit 1
           fi
         continue-on-error: true
@@ -69,6 +73,9 @@ jobs:
         continue-on-error: true
 
         # Builder et pousser l'image Docker après la vérification des conteneurs
+      - name: Log out from Docker Hub (cleanup)
+        run: docker logout
+
       - name: Log in to Docker Hub
         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
@@ -77,6 +84,7 @@ jobs:
 
       - name: Push Docker image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
+        continue-on-error: true
 
       - name: Checkout release branch with token
         if: success()
@@ -85,12 +93,16 @@ jobs:
           ref: release
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
+      - name: Pull latest changes from main
+        run: git pull origin main
+
       - name: Update version in files on main
         if: success()
         run: |
           VERSION=$(date +"%Y.%m.%d")-$(git rev-parse --short HEAD)
           echo "Updating version to $VERSION"
           sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
+        continue-on-error: true
 
       - name: Commit updated package.json on main
         if: success()
@@ -103,7 +115,7 @@ jobs:
           echo "Updating version to $VERSION"
           git commit -m "Update version to $VERSION [skip ci]"
           git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }} main
-        
+
       - name: Checkout release branch with token
         if: success()
         uses: actions/checkout@v3
@@ -149,4 +161,3 @@ jobs:
           curl -X POST -H "Content-Type: application/json" -d '{
             "content": "**Release Notes - API CUSTOMER**\n\n**Commit N°**: '"${COMMIT_SHA}"'\n**Auteur du commit**: '"${COMMIT_AUTHOR}"'\n**Date du commit**: '"${COMMIT_DATE}"'\n**Heure du commit**: '"${COMMIT_TIME}"'\n**Description commit**: '"${COMMIT_MESSAGE}"'"
           }' "$DISCORD_WEBHOOK_URL_RELEASE"
-
