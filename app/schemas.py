@@ -189,6 +189,12 @@ class LoginLog(LoginLogBase):
     class Config:
         orm_mode = True
 
+
+# Schéma pour Login
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
 #
 
 class CustomerCompanyBase(BaseModel):

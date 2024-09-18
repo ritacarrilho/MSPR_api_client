@@ -1,8 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import Annotated
 from app import models, schemas, controllers
 from .database import get_db
 from typing import List
+from .middleware import verify_password, create_access_token, verify_access_token, get_current_customer
+
 
 # Initialisation de l'application FastAPI
 app = FastAPI(
@@ -11,6 +14,31 @@ app = FastAPI(
     summary="API Clients",
     version="0.0.2",
 )
+
+
+@app.post("/login")
+def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
+    # Fetch the customer by email
+    customer = db.query(models.Customer).filter(models.Customer.email == login_data.email).first()
+
+    if not customer or not verify_password(login_data.password, customer.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Create JWT token
+    access_token = create_access_token(data={"id_customer": customer.id_customer, "email": customer.email})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+@app.get("/customers/me")
+def read_customer_me(token: str = Depends(verify_access_token)):
+    if not token:
+        raise HTTPException(status_code=401, detail="Invalid token or token expired")
+    
+    return {"customer_id": token["id_customer"], "email": token["email"]}
+
 
 # @app.get("/test_db_connection/")
 # def test_db_connection(db: Session = Depends(get_db)):
@@ -32,10 +60,16 @@ def read_customers(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)
     return customers
 
 @app.get("/customers/{customer_id}", response_model=schemas.Customer, tags=["Customers"])
-def read_customer(customer_id: int, db: Session = Depends(get_db)):
+def read_customer(customer_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Récupère un client par ID.
     """
+    if current_customer["id_customer"] != customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to access this resource"
+        )
+
     customer = controllers.get_customer_by_id(db, customer_id)
     if customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
