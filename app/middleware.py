@@ -1,17 +1,23 @@
+import os
+from fastapi.security import OAuth2PasswordBearer
+from fastapi import FastAPI, Depends, HTTPException, status
+from dotenv import load_dotenv
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
-from fastapi.security import OAuth2PasswordBearer
-from fastapi import FastAPI, Depends, HTTPException, status
 
+# Load environment variables
+load_dotenv()
 
 # Setup the password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = "your_secret_key"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  # Token valid for 30 minutes
+# Load secret key, algorithm, and token expiry from environment
+SECRET_KEY = os.getenv('SECRET_KEY')
+ALGORITHM = os.getenv('ALGORITHM')
+ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
+
 
 def hash_password(password: str) -> str:
     """
@@ -32,7 +38,7 @@ def create_access_token(data: dict) -> str:
     Create a JWT access token.
     """
     to_encode = data.copy()
-    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    expire = datetime.utcnow() + timedelta(minutes=int(ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
@@ -48,6 +54,7 @@ def verify_access_token(token: str) -> dict:
     except JWTError:
         return None
 
+
 def get_current_customer(token: str = Depends(oauth2_scheme)):
     # Verify JWT Token
     payload = verify_access_token(token)
@@ -58,30 +65,37 @@ def get_current_customer(token: str = Depends(oauth2_scheme)):
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    if 'role' not in payload:
+    # Print the payload for debugging purposes
+    print(f"Decoded token payload: {payload}")
+
+    if 'customer_type' not in payload:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="No role found in token"
         )
+
     return payload
-    
+
 
 def is_admin(current_customer: dict):
     """
     Check if the current customer has admin privileges.
+    Admin is represented by customer_type = 1.
     """
-    if current_customer["role"] != "admin":
+    print(f"Checking admin access: customer_type={current_customer['customer_type']}")
+    
+    if current_customer["customer_type"] != 1:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have the necessary permissions to access this resource"
         )
 
-
 def is_customer_or_admin(current_customer: dict, customer_id: int):
     """
-    Check if the current customer is the owner of the resource or an admin.
+    Check if the current customer is either the owner of the resource or an admin.
+    Admin is represented by customer_type = 1.
     """
-    if current_customer["role"] != "admin" and current_customer["id_customer"] != customer_id:
+    if current_customer["customer_type"] != 1 and current_customer["id_customer"] != customer_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to access this resource"

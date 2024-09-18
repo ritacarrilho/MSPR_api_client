@@ -18,6 +18,7 @@ app = FastAPI(
 # ---------------------- Login Endpoints ---------------------- #
 @app.post("/login")
 def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
+    # Find the customer by email
     customer = db.query(models.Customer).filter(models.Customer.email == login_data.email).first()
 
     if not customer or not verify_password(login_data.password, customer.password_hash):
@@ -30,9 +31,11 @@ def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
     access_token = create_access_token(data={
         "id_customer": customer.id_customer,
         "email": customer.email,
-        "role": customer.role
+        "customer_type": customer.customer_type  # Ensure this is being set correctly
     })
 
+    print(f"Login successful. Generated token payload: customer_type={customer.customer_type}")
+    
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -106,7 +109,7 @@ def read_company(company_id: int, db: Session = Depends(get_db), current_custome
     Récupère une entreprise par ID.
     """
     customer_company = controllers.get_customer_company_by_ids(db, current_customer["id_customer"], company_id)
-    if not customer_company and current_customer["role"] != "admin":
+    if not customer_company and current_customer["customer_type"] != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to access this company")
     return controllers.get_company_by_id(db, company_id)
 
@@ -150,7 +153,7 @@ def read_feedback(feedback_id: int, db: Session = Depends(get_db), current_custo
     Récupère un feedback par ID.
     """
     feedback = controllers.get_feedback_by_id(db, feedback_id)
-    if feedback.id_customer != current_customer["id_customer"] and current_customer["role"] != "admin":
+    if feedback.id_customer != current_customer["id_customer"] and current_customer["customer_type"] != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to access this feedback")
     return feedback
 
@@ -168,7 +171,7 @@ def update_feedback(feedback_id: int, feedback_update: schemas.FeedbackUpdate, d
     Met à jour un feedback existant.
     """
     feedback = controllers.get_feedback_by_id(db, feedback_id)
-    if feedback.id_customer != current_customer["id_customer"] and current_customer["role"] != "admin":
+    if feedback.id_customer != current_customer["id_customer"] and current_customer["customer_type"] != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to update this feedback")
     return controllers.update_feedback(db, feedback_id, feedback_update)
 
@@ -178,7 +181,7 @@ def delete_feedback(feedback_id: int, db: Session = Depends(get_db), current_cus
     Supprime un feedback par ID.
     """
     feedback = controllers.get_feedback_by_id(db, feedback_id)
-    if feedback.id_customer != current_customer["id_customer"] and current_customer["role"] != "admin":
+    if feedback.id_customer != current_customer["id_customer"] and current_customer["customer_type"] != "admin":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You are not authorized to delete this feedback")
     return controllers.delete_feedback(db, feedback_id)
 

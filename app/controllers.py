@@ -21,8 +21,7 @@ def create_customer(db: Session, customer: schemas.CustomerCreate):
     """
     Create a new customer with a hashed password.
     """
-    # Hash the password before saving it
-    hashed_password = hash_password(customer.password_hash)  # Use the plain password and hash it
+    hashed_password = hash_password(customer.password_hash)  
 
     db_customer = models.Customer(
         name=customer.name,
@@ -32,7 +31,7 @@ def create_customer(db: Session, customer: schemas.CustomerCreate):
         last_name=customer.last_name,
         phone=customer.phone,
         email=customer.email,
-        password_hash=hashed_password,  # Store the hashed password
+        password_hash=hashed_password,  
         last_login=customer.last_login,
         customer_type=customer.customer_type,
         failed_login_attempts=customer.failed_login_attempts,
