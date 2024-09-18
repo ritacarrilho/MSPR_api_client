@@ -32,7 +32,7 @@ jobs:
 
       - name: Create shared Docker network
         run: |
-          docker network ls | grep kawa-shared-network || docker network create kawa-shared-network
+          docker network ls | grep ${{ secrets.REF_NETWORK }} || docker network create ${{ secrets.REF_NETWORK }}
 
       - name: Build Docker images
         run: |
