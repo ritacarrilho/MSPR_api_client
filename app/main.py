@@ -339,7 +339,7 @@ async def get_customer_orders(customer_id: int):
         raise HTTPException(status_code=500, detail=f"Failed to fetch customer orders: {str(e)}")
     
 
-@app.get("/customers/{customer_id}/orders/{order_id}/products")
+@app.get("/customers/{customer_id}/orders/{order_id}/products", tags=["CustomerOrdersProducts"])
 async def get_customer_order_products(customer_id: int, order_id: int):
     """Fetch products for a specific order of a customer."""
     try:
