@@ -21,6 +21,7 @@ class Customer(Base):
     preferred_contact_method = Column(Integer)
     opt_in_marketing = Column(Boolean)
     loyalty_points = Column(Integer, nullable=False, default=0)
+    role=Column(String(10), nullable=False, default="customer")
 
     companies = relationship("Company", secondary="Customer_Companies", back_populates="customers")
     feedbacks = relationship("Feedback", back_populates="customer")

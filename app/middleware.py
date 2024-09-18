@@ -47,23 +47,42 @@ def verify_access_token(token: str) -> dict:
         return payload
     except JWTError:
         return None
+
+def get_current_customer(token: str = Depends(oauth2_scheme)):
+    # Verify JWT Token
+    payload = verify_access_token(token)
+    if payload is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if 'role' not in payload:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="No role found in token"
+        )
+    return payload
     
 
+def is_admin(current_customer: dict):
+    """
+    Check if the current customer has admin privileges.
+    """
+    if current_customer["role"] != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have the necessary permissions to access this resource"
+        )
 
-def get_current_customer(token: str = Depends(oauth2_scheme)) -> dict:
+
+def is_customer_or_admin(current_customer: dict, customer_id: int):
     """
-    Verify the JWT token and return the payload.
+    Check if the current customer is the owner of the resource or an admin.
     """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        id_customer: str = payload.get("id_customer")
-        if id_customer is None:
-            raise credentials_exception
-        return payload 
-    except JWTError:
-        raise credentials_exception
+    if current_customer["role"] != "admin" and current_customer["id_customer"] != customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to access this resource"
+        )

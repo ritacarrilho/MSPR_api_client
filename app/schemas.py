@@ -17,10 +17,13 @@ class CustomerBase(BaseModel):
     preferred_contact_method: Optional[int] = None
     opt_in_marketing: Optional[bool] = False
     loyalty_points: Optional[int] = 0
+    role: str
 
 # Schéma pour la création d'un Customer
 class CustomerCreate(CustomerBase):
     password_hash: str
+    role: Optional[str] = "customer"
+    
 
 # Schéma pour le retour d'un Customer
 class Customer(CustomerBase):
