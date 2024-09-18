@@ -64,6 +64,6 @@ def get_current_customer(token: str = Depends(oauth2_scheme)) -> dict:
         id_customer: str = payload.get("id_customer")
         if id_customer is None:
             raise credentials_exception
-        return payload  # The payload should include 'id_customer'
+        return payload 
     except JWTError:
         raise credentials_exception

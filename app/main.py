@@ -15,7 +15,7 @@ app = FastAPI(
     version="0.0.2",
 )
 
-
+# ---------------------- Login Endpoints ---------------------- #
 @app.post("/login")
 def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
     # Fetch the customer by email
@@ -31,13 +31,6 @@ def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db)):
     # Create JWT token
     access_token = create_access_token(data={"id_customer": customer.id_customer, "email": customer.email})
     return {"access_token": access_token, "token_type": "bearer"}
-
-@app.get("/customers/me")
-def read_customer_me(token: str = Depends(verify_access_token)):
-    if not token:
-        raise HTTPException(status_code=401, detail="Invalid token or token expired")
-    
-    return {"customer_id": token["id_customer"], "email": token["email"]}
 
 
 # @app.get("/test_db_connection/")
@@ -83,17 +76,29 @@ def create_customer(customer: schemas.CustomerCreate, db: Session = Depends(get_
     return controllers.create_customer(db, customer)
 
 @app.patch("/customers/{customer_id}", response_model=schemas.Customer, tags=["Customers"])
-def update_customer(customer_id: int, customer_update: schemas.CustomerUpdate, db: Session = Depends(get_db)):
+def update_customer(customer_id: int, customer_update: schemas.CustomerUpdate, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Met à jour un client existant.
     """
+    if current_customer["id_customer"] != customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to update this customer"
+        )
+
     return controllers.update_customer(db, customer_id, customer_update)
 
 @app.delete("/customers/{customer_id}", tags=["Customers"])
-def delete_customer(customer_id: int, db: Session = Depends(get_db)):
+def delete_customer(customer_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Supprime un client par ID.
     """
+    if current_customer["id_customer"] != customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to delete this customer"
+        )
+
     deleted_customer = controllers.delete_customer(db, customer_id)
     if deleted_customer is None:
         raise HTTPException(status_code=404, detail="Customer not found")
@@ -110,15 +115,23 @@ def read_companies(db: Session = Depends(get_db)):
     return companies
 
 @app.get("/companies/{company_id}", response_model=schemas.Company, tags=["Companies"])
-def read_company(company_id: int, db: Session = Depends(get_db)):
+def read_company(company_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Récupère une entreprise par ID.
     """
+    # Check if customer has access to this company
+    customer_company = controllers.get_customer_company_by_ids(db, current_customer["id_customer"], company_id)
+    if not customer_company:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to access this company"
+        )
+
     company = controllers.get_company_by_id(db, company_id)
     if company is None:
         raise HTTPException(status_code=404, detail="Company not found")
+    
     return company
-
 @app.post("/companies/", response_model=schemas.Company, tags=["Companies"])
 def create_company(company: schemas.CompanyCreate, db: Session = Depends(get_db)):
     """
@@ -134,13 +147,22 @@ def update_company(company_id: int, company_update: schemas.CompanyUpdate, db: S
     return controllers.update_company(db, company_id, company_update)
 
 @app.delete("/companies/{company_id}", tags=["Companies"])
-def delete_company(company_id: int, db: Session = Depends(get_db)):
+def delete_company(company_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Supprime une entreprise par ID.
     """
+    # Check if customer has access to this company
+    customer_company = controllers.get_customer_company_by_ids(db, current_customer["id_customer"], company_id)
+    if not customer_company:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to delete this company"
+        )
+
     deleted_company = controllers.delete_company(db, company_id)
     if deleted_company is None:
         raise HTTPException(status_code=404, detail="Company not found")
+    
     return {"message": "Company deleted successfully"}
 
 # ---------------------- Feedback Endpoints ---------------------- #
@@ -154,13 +176,22 @@ def read_feedbacks(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)
     return feedbacks
 
 @app.get("/feedbacks/{feedback_id}", response_model=schemas.Feedback, tags=["Feedbacks"])
-def read_feedback(feedback_id: int, db: Session = Depends(get_db)):
+def read_feedback(feedback_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Récupère un feedback par ID.
     """
     feedback = controllers.get_feedback_by_id(db, feedback_id)
+
+    # Verify that the feedback belongs to the current customer
+    if feedback.id_customer != current_customer["id_customer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to access this feedback"
+        )
+
     if feedback is None:
         raise HTTPException(status_code=404, detail="Feedback not found")
+    
     return feedback
 
 @app.post("/feedbacks/", response_model=schemas.Feedback, tags=["Feedbacks"])
@@ -178,14 +209,23 @@ def update_feedback(feedback_id: int, feedback_update: schemas.FeedbackUpdate, d
     return controllers.update_feedback(db, feedback_id, feedback_update)
 
 @app.delete("/feedbacks/{feedback_id}", tags=["Feedbacks"])
-def delete_feedback(feedback_id: int, db: Session = Depends(get_db)):
+def delete_feedback(feedback_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Supprime un feedback par ID.
     """
-    deleted_feedback = controllers.delete_feedback(db, feedback_id)
-    if deleted_feedback is None:
+    feedback = controllers.get_feedback_by_id(db, feedback_id)
+
+    # Verify that the feedback belongs to the current customer
+    if feedback.id_customer != current_customer["id_customer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to delete this feedback"
+        )
+
+    if feedback is None:
         raise HTTPException(status_code=404, detail="Feedback not found")
-    return {"message": "Feedback deleted successfully"}
+    
+    return controllers.delete_feedback(db, feedback_id)
 
 # ---------------------- Notifications Endpoints ---------------------- #
 
@@ -197,13 +237,22 @@ def read_notifications(skip: int = 0, limit: int = 10, db: Session = Depends(get
     return controllers.get_notifications(db, skip=skip, limit=limit)
 
 @app.get("/notifications/{notification_id}", response_model=schemas.Notification, tags=["Notifications"])
-def read_notification(notification_id: int, db: Session = Depends(get_db)):
+def read_notification(notification_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Récupère une notification par ID.
     """
     notification = controllers.get_notification_by_id(db, notification_id)
+
+    # Verify that the notification belongs to the current customer
+    if notification.id_customer != current_customer["id_customer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to access this notification"
+        )
+
     if notification is None:
         raise HTTPException(status_code=404, detail="Notification not found")
+    
     return notification
 
 @app.post("/notifications/", response_model=schemas.Notification, tags=["Notifications"])
@@ -224,14 +273,23 @@ def update_notification(notification_id: int, notification_update: schemas.Notif
     return notification
 
 @app.delete("/notifications/{notification_id}", response_model=schemas.Notification, tags=["Notifications"])
-def delete_notification(notification_id: int, db: Session = Depends(get_db)):
+def delete_notification(notification_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Supprime une notification par ID.
     """
-    notification = controllers.delete_notification(db, notification_id)
+    notification = controllers.get_notification_by_id(db, notification_id)
+
+    # Verify that the notification belongs to the current customer
+    if notification.id_customer != current_customer["id_customer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to delete this notification"
+        )
+
     if notification is None:
         raise HTTPException(status_code=404, detail="Notification not found")
-    return notification
+    
+    return controllers.delete_notification(db, notification_id)
 
 # ---------------------- Addresses Endpoints ---------------------- #
 
@@ -243,13 +301,22 @@ def get_addresses(skip: int = 0, limit: int = 10, db: Session = Depends(get_db))
     return controllers.get_addresses(db, skip=skip, limit=limit)
 
 @app.get("/addresses/{address_id}", response_model=schemas.Address, tags=["Addresses"])
-def get_address(address_id: int, db: Session = Depends(get_db)):
+def get_address(address_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Récupère une adresse par ID.
     """
     address = controllers.get_address_by_id(db, address_id)
+
+    # Verify that the address belongs to the current customer
+    if address.id_customer != current_customer["id_customer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to access this address"
+        )
+
     if address is None:
         raise HTTPException(status_code=404, detail="Address not found")
+    
     return address
 
 @app.post("/addresses/", response_model=schemas.Address, tags=["Addresses"])
@@ -270,14 +337,23 @@ def update_address(address_id: int, address_update: schemas.AddressUpdate, db: S
     return address
 
 @app.delete("/addresses/{address_id}", response_model=schemas.Address, tags=["Addresses"])
-def delete_address(address_id: int, db: Session = Depends(get_db)):
+def delete_address(address_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Supprime une adresse par ID.
     """
-    address = controllers.delete_address(db, address_id)
+    address = controllers.get_address_by_id(db, address_id)
+
+    # Verify that the address belongs to the current customer
+    if address.id_customer != current_customer["id_customer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to delete this address"
+        )
+
     if address is None:
         raise HTTPException(status_code=404, detail="Address not found")
-    return address
+
+    return controllers.delete_address(db, address_id)
 
 # ---------------------- LoginLog Endpoints ---------------------- #
 
@@ -320,10 +396,16 @@ def read_customer_companies(skip: int = 0, limit: int = 10, db: Session = Depend
     return controllers.get_customer_companies(db, skip=skip, limit=limit)
 
 @app.get("/customer-companies/{customer_id}/{company_id}", response_model=schemas.CustomerCompany, tags=["CustomerCompanies"])
-def read_customer_company(customer_id: int, company_id: int, db: Session = Depends(get_db)):
+def read_customer_company(customer_id: int, company_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Récupère une relation spécifique entre un client et une entreprise.
     """
+    if current_customer["id_customer"] != customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to access this resource"
+        )
+
     db_customer_company = controllers.get_customer_company_by_ids(db, customer_id, company_id)
     if db_customer_company is None:
         raise HTTPException(status_code=404, detail="CustomerCompany not found")
@@ -336,12 +418,21 @@ def create_customer_company(customer_company: schemas.CustomerCompanyCreate, db:
     """
     return controllers.create_customer_company(db, customer_company)
 
-@app.patch("/customer-companies/{customer_id}/{company_id}", response_model=schemas.CustomerCompany, tags=["CustomerCompanies"])
-def update_customer_company(customer_id: int, company_id: int, customer_company_update: schemas.CustomerCompanyUpdate, db: Session = Depends(get_db)):
+@app.delete("/customer-companies/{customer_id}/{company_id}", response_model=schemas.CustomerCompany, tags=["CustomerCompanies"])
+def delete_customer_company(customer_id: int, company_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
-    Met à jour une relation existante entre un client et une entreprise.
+    Supprime une relation entre un client et une entreprise.
     """
-    return controllers.update_customer_company(db, customer_id, company_id, customer_company_update)
+    if current_customer["id_customer"] != customer_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not authorized to delete this resource"
+        )
+
+    db_customer_company = controllers.delete_customer_company(db, customer_id, company_id)
+    if db_customer_company is None:
+        raise HTTPException(status_code=404, detail="CustomerCompany not found")
+    return db_customer_company
 
 @app.delete("/customer-companies/{customer_id}/{company_id}", response_model=schemas.CustomerCompany, tags=["CustomerCompanies"])
 def delete_customer_company(customer_id: int, company_id: int, db: Session = Depends(get_db)):
