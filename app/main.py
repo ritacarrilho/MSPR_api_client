@@ -659,7 +659,7 @@ async def update_login_log(log_id: int, login_log: schemas.LoginLogUpdate, db: S
         raise HTTPException(status_code=500, detail="An error occurred while updating the login log")
     
 
-@app.delete("/login-logs/{log_id}", response_model=schemas.LoginLog, tags=["LoginLogs"])
+@app.delete("/login-logs/{log_id}", tags=["LoginLogs"])
 async def delete_login_log(log_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Supprime un login log par ID.
