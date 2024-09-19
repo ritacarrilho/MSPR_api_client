@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from . import models, schemas
 from fastapi import HTTPException
+from .middleware import hash_password
 
 # --------------------- Customer Controllers --------------------- #
 
@@ -18,8 +19,10 @@ def get_customer_by_id(db: Session, customer_id: int):
 
 def create_customer(db: Session, customer: schemas.CustomerCreate):
     """
-    Crée un nouveau client.
+    Create a new customer with a hashed password.
     """
+    hashed_password = hash_password(customer.password_hash)  
+
     db_customer = models.Customer(
         name=customer.name,
         created_at=customer.created_at,
@@ -28,13 +31,14 @@ def create_customer(db: Session, customer: schemas.CustomerCreate):
         last_name=customer.last_name,
         phone=customer.phone,
         email=customer.email,
-        password_hash=customer.password_hash,
+        password_hash=hashed_password,  
         last_login=customer.last_login,
         customer_type=customer.customer_type,
         failed_login_attempts=customer.failed_login_attempts,
         preferred_contact_method=customer.preferred_contact_method,
         opt_in_marketing=customer.opt_in_marketing,
-        loyalty_points=customer.loyalty_points
+        loyalty_points=customer.loyalty_points,
+        role=customer.role
     )
     db.add(db_customer)
     db.commit()

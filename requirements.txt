@@ -8,3 +8,10 @@ pymysql
 mysql-connector-python
 sqlalchemy
 sqlalchemy-utils
+jose
+python-jose
+passlib
+python-multipart
+pyjwt
+asyncpg
+asyncio

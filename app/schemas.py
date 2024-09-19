@@ -12,15 +12,16 @@ class CustomerBase(BaseModel):
     phone: Optional[str] = None
     email: str
     last_login: datetime
-    customer_type: int
+    customer_type: int  # 1 for admin, 2 for customer
     failed_login_attempts: Optional[int] = 0
     preferred_contact_method: Optional[int] = None
     opt_in_marketing: Optional[bool] = False
     loyalty_points: Optional[int] = 0
 
-# Schéma pour la création d'un Customer
+# Schema for creating a new customer
 class CustomerCreate(CustomerBase):
     password_hash: str
+    customer_type: Optional[int] = 2 
 
 # Schéma pour le retour d'un Customer
 class Customer(CustomerBase):
@@ -188,6 +189,12 @@ class LoginLog(LoginLogBase):
 
     class Config:
         orm_mode = True
+
+
+# Schéma pour Login
+class LoginRequest(BaseModel):
+    email: str
+    password: str
 
 #
 
