@@ -176,9 +176,9 @@ async def create_company(company: schemas.CompanyCreate, db: Session = Depends(g
     """
     Crée une nouvelle entreprise.
     """
+    is_customer_or_admin(current_customer, current_customer["id_customer"])
     try:
-        if is_customer_or_admin(current_customer, current_customer["id_customer"]):
-            new_company = controllers.create_company(db, company)
+        new_company = controllers.create_company(db, company)
         if not new_company:
             raise HTTPException(status_code=400, detail="Company could not be created")
         
@@ -435,7 +435,7 @@ async def update_notification(notification_id: int, notification_update: schemas
         raise HTTPException(status_code=500, detail="An error occurred while updating the notification")
 
 
-@app.delete("/notifications/{notification_id}", response_model=schemas.Notification, tags=["Notifications"])
+@app.delete("/notifications/{notification_id}", tags=["Notifications"])
 async def delete_notification(notification_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Supprime une notification par ID.
@@ -552,7 +552,7 @@ async def update_address(address_id: int, address_update: schemas.AddressUpdate,
         raise HTTPException(status_code=500, detail="An error occurred while updating the address")
 
 
-@app.delete("/addresses/{address_id}", response_model=schemas.Address, tags=["Addresses"])
+@app.delete("/addresses/{address_id}", tags=["Addresses"])
 async def delete_address(address_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Supprime une adresse par ID.
@@ -741,7 +741,7 @@ async def create_customer_company(customer_company: schemas.CustomerCompanyCreat
         raise HTTPException(status_code=500, detail="An error occurred while creating the customer-company relationship")
 
 
-@app.delete("/customer-companies/{customer_id}/{company_id}", response_model=schemas.CustomerCompany, tags=["CustomerCompanies"])
+@app.delete("/customer-companies/{customer_id}/{company_id}", tags=["CustomerCompanies"])
 async def delete_customer_company(customer_id: int, company_id: int, db: Session = Depends(get_db), current_customer: dict = Depends(get_current_customer)):
     """
     Supprime une relation entre un client et une entreprise.
