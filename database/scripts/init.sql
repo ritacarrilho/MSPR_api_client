@@ -33,16 +33,16 @@ CREATE TABLE Companies(
    UNIQUE(email)
 );
 
-CREATE TABLE Customer_Feedback(
-   id_feedback INT AUTO_INCREMENT,
-   product_id INT NOT NULL,
-   rating INT,
-   comment VARCHAR(50),
-   created_at DATETIME,
-   id_customer INT NOT NULL,
-   PRIMARY KEY(id_feedback),
-   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
-);
+-- CREATE TABLE Customer_Feedback(
+--    id_feedback INT AUTO_INCREMENT,
+--    product_id INT NOT NULL,
+--    rating INT,
+--    comment VARCHAR(50),
+--    created_at DATETIME,
+--    id_customer INT NOT NULL,
+--    PRIMARY KEY(id_feedback),
+--    FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+-- );
 
 CREATE TABLE Notifications(
    id_notification INT AUTO_INCREMENT,
