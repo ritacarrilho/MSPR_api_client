@@ -93,8 +93,8 @@ CREATE TABLE Customer_Companies(
 
 INSERT INTO Customers (name, created_at, updated_at, username, first_name, last_name, phone, email, password_hash, last_login, customer_type, failed_login_attempts, preferred_contact_method, opt_in_marketing, loyalty_points) 
 VALUES 
-('CaféLover', NOW(), NULL, 'cafefan123', 'Jean', 'Dupont', '612345678', 'jean.dupont@example.com', 'zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 2, 0, 1, TRUE, 120),
-('ProBarista', NOW(), NULL, 'barista_pro', 'Marie', 'Durand', '698765432', 'marie.durand@procoffee.com', 'zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 2, 0, 2, TRUE, 300),
+('CaféLover', NOW(), NULL, 'cafefan123', 'Jean', 'Dupont', '612345678', 'jean.dupont@example.com', '$2b$12$sBu.zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 2, 0, 1, TRUE, 120),
+('ProBarista', NOW(), NULL, 'barista_pro', 'Marie', 'Durand', '698765432', 'marie.durand@procoffee.com', '$2b$12$sBu.zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 2, 0, 2, TRUE, 300),
 ('toto', NOW(), NULL, 'kawa', 'kawa', 'kawa', '698765123', 'toto@email.com', '$2b$12$sBu.zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 2, 0, 2, TRUE, 300),
 ('admin', NOW(), NULL, 'kawa', 'kawa', 'kawa', '698765123', 'admin@email.com', '$2b$12$sBu.zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 1, 0, 2, TRUE, 300);
 
@@ -125,5 +125,5 @@ VALUES
 
 INSERT INTO Customer_Companies (id_customer, id_company) 
 VALUES 
-(2, 1),
+(1, 1),
 (2, 2);
