@@ -155,9 +155,9 @@ async def read_company(company_id: int, db: Session = Depends(get_db), current_c
                 raise HTTPException(status_code=404, detail="Company not found")
             return company
         
-        customer_company = controllers.get_customer_company_by_ids(db, current_customer["id_customer"], company_id)
-        if not customer_company:
-            raise HTTPException(status_code=403, detail="You are not authorized to access this company")
+        # customer_company = controllers.get_customer_company_by_ids(db, current_customer["id_customer"], company_id)
+        # if not customer_company:
+        #     raise HTTPException(status_code=403, detail="You are not authorized to access this company")
         
         company = controllers.get_company_by_id(db, company_id)
         if not company:
