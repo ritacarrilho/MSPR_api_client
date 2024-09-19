@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
-from . import models, schemas, controllers
+from typing import Annotated
+from sqlalchemy.ext.asyncio import AsyncSession
+from app import models, schemas, controllers
 from .database import get_db
+from typing import List
 from .middleware import verify_password, create_access_token, get_current_customer, is_admin, is_customer_or_admin
-from .messaging.service import fetch_customer_orders, fetch_order_products
 
 
 # Initialisation de l'application FastAPI
@@ -36,6 +37,7 @@ async def login(login_data: schemas.LoginRequest, db: Session = Depends(get_db))
     print(f"Login successful. Generated token payload: customer_type={customer.customer_type}")
     
     return {"access_token": access_token, "token_type": "bearer"}
+
 
 # @app.get("/test_db_connection/")
 # def test_db_connection(db: Session = Depends(get_db)):
@@ -133,6 +135,7 @@ async def read_companies(db: Session = Depends(get_db), current_customer: dict =
     Récupère la liste des entreprises.
     """
     is_admin(current_customer)
+    
     try:
         companies = controllers.get_all_companies(db)
         return companies
@@ -146,21 +149,26 @@ async def read_company(company_id: int, db: Session = Depends(get_db), current_c
     Récupère une entreprise par ID.
     """
     try:
-        company = controllers.get_company_by_id(db, company_id)
-
-        if not company:
-            raise HTTPException(status_code=404, detail="Company not found")
-        if current_customer["customer_type"] == 1: 
+        if is_customer_or_admin(current_customer, current_customer["id_customer"]): 
+            company = controllers.get_company_by_id(db, company_id)
+            if not company:
+                raise HTTPException(status_code=404, detail="Company not found")
             return company
+        
         customer_company = controllers.get_customer_company_by_ids(db, current_customer["id_customer"], company_id)
         if not customer_company:
             raise HTTPException(status_code=403, detail="You are not authorized to access this company")
+        
+        company = controllers.get_company_by_id(db, company_id)
+        if not company:
+            raise HTTPException(status_code=404, detail="Company not found")
+        
         return company
 
-    except HTTPException as http_exc:
-        raise http_exc 
+    except HTTPException:
+        raise 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"An error occurred while fetching the company: {str(e)}")
+        raise HTTPException(status_code=500, detail="An error occurred while fetching the company")
 
 
 @app.post("/companies/", response_model=schemas.Company, tags=["Companies"])
@@ -754,34 +762,3 @@ async def delete_customer_company(customer_id: int, company_id: int, db: Session
         print(f"Error deleting customer-company relationship: {e}")
         raise HTTPException(status_code=500, detail="An error occurred while deleting the customer-company relationship")
     
-
-
-@app.get("/customers/{customer_id}/orders", tags=["CustomerOrdersProducts"])
-async def get_customer_orders(customer_id: int):
-    """API endpoint to get a customer's orders."""
-    try:
-        orders = await fetch_customer_orders(customer_id)
-        print(orders)
-        if orders:
-            return {"customer_id": customer_id, "orders": orders}
-        else:
-            raise HTTPException(status_code=404, detail="No orders found for this customer")
-    except TimeoutError:
-        raise HTTPException(status_code=504, detail="Request to order service timed out")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch customer orders: {str(e)}")
-    
-
-@app.get("/customers/{customer_id}/orders/{order_id}/products", tags=["CustomerOrdersProducts"])
-async def get_customer_order_products(customer_id: int, order_id: int):
-    """Fetch products for a specific order of a customer."""
-    try:
-        products = await fetch_order_products(customer_id, order_id)
-        print(f"Response products: {products}")
-        if not products:
-            raise HTTPException(status_code=404, detail="No products found for this order.")
-        return {"customer_id": customer_id, "order_id": order_id, "products": products}
-    except TimeoutError:
-        raise HTTPException(status_code=504, detail="Request timed out.")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fetch products for order: {str(e)}")

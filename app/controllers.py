@@ -38,7 +38,6 @@ def create_customer(db: Session, customer: schemas.CustomerCreate):
         preferred_contact_method=customer.preferred_contact_method,
         opt_in_marketing=customer.opt_in_marketing,
         loyalty_points=customer.loyalty_points,
-        role=customer.role
     )
     db.add(db_customer)
     db.commit()
