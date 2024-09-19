@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 # Schéma de base pour Customer
@@ -213,5 +213,45 @@ class CustomerCompanyUpdate(BaseModel):
         orm_mode = True
 
 class CustomerCompany(CustomerCompanyBase):
+    class Config:
+        orm_mode = True
+
+
+# Define the schema for an order product
+class OrderProductSchema(BaseModel):
+    productId: int
+    quantity: int
+
+# Define the schema for a single order
+class OrderSchema(BaseModel):
+    id_order: int
+    createdAt: datetime
+    status: int
+
+    class Config:
+        orm_mode = True
+
+# Define the response schema for fetching customer orders
+class CustomerOrdersResponse(BaseModel):
+    customer_id: int
+    orders: List[OrderSchema]
+
+    class Config:
+        orm_mode = True
+
+
+class OrderProductSchema(BaseModel):
+    productId: int
+    quantity: int
+
+    class Config:
+        orm_mode = True
+
+class CustomerOrderProductResponse(BaseModel):
+    customer_id: int
+    order_id: int
+    order_status: int
+    products: List[OrderProductSchema]
+
     class Config:
         orm_mode = True

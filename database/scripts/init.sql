@@ -89,7 +89,16 @@ CREATE TABLE Customer_Companies(
    FOREIGN KEY(id_company) REFERENCES Companies(id_company)
 );
 
-
+CREATE TABLE Customer_Feedback(
+   id_feedback INT AUTO_INCREMENT,
+   product_id INT NOT NULL,
+   rating INT,
+   comment VARCHAR(50),
+   created_at DATETIME,
+   id_customer INT NOT NULL,
+   PRIMARY KEY(id_feedback),
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+);
 
 INSERT INTO Customers (name, created_at, updated_at, username, first_name, last_name, phone, email, password_hash, last_login, customer_type, failed_login_attempts, preferred_contact_method, opt_in_marketing, loyalty_points) 
 VALUES 

@@ -17,6 +17,7 @@ services:
       - ./database/scripts:/docker-entrypoint-initdb.d
     networks:
       - kawa-customers-network
+      - kawa-shared-network
 
   kawa-customers-app:
     container_name: kawa_customers
@@ -30,9 +31,12 @@ services:
       - DATABASE_URL=mysql+mysqlconnector://customers:kawacustomers@kawa-customers-db:3306/customer_db
     networks:
       - kawa-customers-network
+      - kawa-shared-network
 
 volumes:
   customers-data:
 
 networks:
   kawa-customers-network:
+  kawa-shared-network:
+    external: true
