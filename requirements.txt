@@ -10,3 +10,10 @@ sqlalchemy
 sqlalchemy-utils
 pika
 aio_pika
+jose
+python-jose
+passlib
+python-multipart
+pyjwt
+asyncpg
+asyncio

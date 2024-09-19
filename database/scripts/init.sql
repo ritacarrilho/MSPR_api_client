@@ -1,4 +1,4 @@
-  CREATE TABLE Customers(
+CREATE TABLE Customers(
    id_customer INT AUTO_INCREMENT,
    name VARCHAR(80) NOT NULL,
    created_at DATETIME NOT NULL,
@@ -89,15 +89,28 @@ CREATE TABLE Customer_Companies(
    FOREIGN KEY(id_company) REFERENCES Companies(id_company)
 );
 
+CREATE TABLE Customer_Feedback(
+   id_feedback INT AUTO_INCREMENT,
+   product_id INT NOT NULL,
+   rating INT,
+   comment VARCHAR(50),
+   created_at DATETIME,
+   id_customer INT NOT NULL,
+   PRIMARY KEY(id_feedback),
+   FOREIGN KEY(id_customer) REFERENCES Customers(id_customer)
+);
+
 INSERT INTO Customers (name, created_at, updated_at, username, first_name, last_name, phone, email, password_hash, last_login, customer_type, failed_login_attempts, preferred_contact_method, opt_in_marketing, loyalty_points) 
 VALUES 
-('CaféLover', NOW(), NULL, 'cafefan123', 'Jean', 'Dupont', '0612345678', 'jean.dupont@example.com', 'hashedpassword123', NOW(), 1, 0, 1, TRUE, 120),
-('ProBarista', NOW(), NULL, 'barista_pro', 'Marie', 'Durand', '0698765432', 'marie.durand@procoffee.com', 'hashedpassword456', NOW(), 2, 0, 2, TRUE, 300);
+('CaféLover', NOW(), NULL, 'cafefan123', 'Jean', 'Dupont', '612345678', 'jean.dupont@example.com', '$2b$12$sBu.zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 2, 0, 1, TRUE, 120),
+('ProBarista', NOW(), NULL, 'barista_pro', 'Marie', 'Durand', '698765432', 'marie.durand@procoffee.com', '$2b$12$sBu.zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 2, 0, 2, TRUE, 300),
+('toto', NOW(), NULL, 'kawa', 'kawa', 'kawa', '698765123', 'toto@email.com', '$2b$12$sBu.zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 2, 0, 2, TRUE, 300),
+('admin', NOW(), NULL, 'kawa', 'kawa', 'kawa', '698765123', 'admin@email.com', '$2b$12$sBu.zaAskPVy8QUUmHUPPu9vi33B0SXLzOe9qO5dJ2G5qQwVDJ4Ve', NOW(), 1, 0, 2, TRUE, 300);
 
 INSERT INTO Companies (company_name, siret, address, postal_code, city, phone, email) 
 VALUES 
-('Coffee Distributors Inc.', '12345678901234', '10 Rue de la Paix', '75002', 'Paris', '0155567788', 'contact@coffee-distributors.com'),
-('Café Express SARL', '98765432109876', '5 Boulevard des Capucines', '75009', 'Paris', '0177889988', 'info@cafeexpress.fr');
+('Coffee Distributors Inc.', '12345678901234', '10 Rue de la Paix', '75002', 'Paris', '155567788', 'contact@coffee-distributors.com'),
+('Café Express SARL', '98765432109876', '5 Boulevard des Capucines', '75009', 'Paris', '177889988', 'info@cafeexpress.fr');
 
 INSERT INTO Customer_Feedback (product_id, rating, comment, created_at, id_customer) 
 VALUES 
@@ -121,5 +134,5 @@ VALUES
 
 INSERT INTO Customer_Companies (id_customer, id_company) 
 VALUES 
-(2, 1),
+(1, 1),
 (2, 2);
