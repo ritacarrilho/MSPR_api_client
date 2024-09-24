@@ -20,11 +20,11 @@ class TestCustomerController(unittest.TestCase):
     #     mock_customers = [Customer(id_customer=1, name="John Doe"), Customer(id_customer=2, name="Jane Doe")]
     #     self.db.query().all.return_value = mock_customers
 
-    #     # Call the get_customers function
     #     result = get_customers(self.db)
-
-    #     # Assert that the returned result is correct
     #     self.db.query.assert_called_once_with(Customer)
+    #     self.db.query().all.assert_called_once()
+
+    #     # Check the result
     #     self.assertEqual(len(result), 2)
     #     self.assertEqual(result[0].name, "John Doe")
     #     self.assertEqual(result[1].name, "Jane Doe")
