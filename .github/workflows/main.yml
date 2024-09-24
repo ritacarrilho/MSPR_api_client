@@ -86,12 +86,10 @@ jobs:
           
       - name: Run unit tests with coverage
         run: |
-          # Run tests with coverage
-          coverage run --source=app -m unittest discover -s tests -p "test_api.py" || true
-          # Generate coverage report
+          coverage run --source=app -m unittest discover -s tests || true
           coverage report
-          coverage xml -o coverage.xml
-
+          coverage xml --omit="/home/runner/work/*" -o coverage.xml
+          
       # - name: Upload test results
       #   uses: actions/upload-artifact@v2
       #   with:
