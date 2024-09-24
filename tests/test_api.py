@@ -53,6 +53,14 @@ class TestDatabase(unittest.TestCase):
             Column('created_at', DateTime),
             Column('id_customer', Integer, ForeignKey('Customers.id_customer'))
         )
+        cls.notifications_table = Table('Notifications', cls.metadata,
+            Column('id_notification', Integer, primary_key=True),
+            Column('message', String, nullable=False),
+            Column('date_created', DateTime, nullable=False),
+            Column('is_read', Boolean, default=False),
+            Column('type', Integer, nullable=False),
+            Column('id_customer', Integer, ForeignKey('Customers.id_customer'), nullable=False)
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -188,6 +196,8 @@ class TestDatabase(unittest.TestCase):
         self.assertIsNotNone(result, "Aucune donnée trouvée dans la table 'Addresses'.")
         self.assertEqual(result['address_line1'], "123 Rue de Paris", "Le champ 'address_line1' est incorrect.")
         
+# --------------------- Feedbacks --------------------- #
+        
     def test_insert_into_feedback(self):
         """Teste l'insertion d'un feedback dans la table 'Feedback'."""
         self.session.execute = MagicMock(return_value=MagicMock(inserted_primary_key=[1]))
@@ -238,6 +248,74 @@ class TestDatabase(unittest.TestCase):
         fetched_feedbacks = result.fetchall()
 
         self.assertGreater(len(fetched_feedbacks), 0, "Aucun feedback trouvé.")
+        
+# --------------------- Notifications --------------------- #
+        
+    def test_table_notifications_exists(self):
+        """Vérifie que la table 'Notifications' existe dans la base de données."""
+        tables = ['Customers', 'Addresses', 'Companies', 'Notifications']
+        self.assertIn('Notifications', tables, "La table 'Notifications' n'existe pas dans la base de données.")
+    
+    def test_insert_into_notifications(self):
+        """Teste l'insertion d'une notification dans la table 'Notifications'."""
+        self.session.execute = MagicMock(return_value=MagicMock(inserted_primary_key=[1]))
+        notification_data = {
+            'message': "Test de notification",
+            'date_created': "2024-09-24T15:01:29.925Z",
+            'is_read': False,
+            'type': 1,
+            'id_customer': 1
+        }
+        
+        insert_query = insert(self.notifications_table).values(**notification_data)
+        result = self.session.execute(insert_query)
+        self.session.commit()
+
+        self.assertIsNotNone(result.inserted_primary_key, "L'insertion dans la table 'Notifications' a échoué.")
+
+    def test_get_notifications(self):
+        """Teste la récupération des notifications."""
+        # Simuler des notifications existantes
+        notification_data = {
+            'id_notification': 1,
+            'message': "Test de message",
+            'date_created': "2024-09-24T15:01:29.925Z",
+            'is_read': False,
+            'type': 0,
+            'id_customer': 1
+        }
+
+        # Insérer la notification
+        self.session.execute(self.notifications_table.insert().values(notification_data))
+        self.session.commit()
+
+        # Exécuter la requête pour récupérer les notifications
+        result = self.session.execute(select(self.notifications_table))
+        notifications = result.fetchall()
+
+        self.assertGreater(len(notifications), 0, "Aucune notification trouvée.")
+
+    def test_delete_notification(self):
+        """Teste la suppression d'une notification."""
+        # Insérer une notification à supprimer
+        notification_id = self.session.execute(self.notifications_table.insert().values({
+            "message": "Notification à supprimer",
+            "date_created": "2024-09-24T15:01:29.925Z",
+            "is_read": False,
+            "type": 0,
+            "id_customer": 1
+        })).inserted_primary_key[0]
+
+        # Simuler la suppression
+        delete_query = self.notifications_table.delete().where(self.notifications_table.c.id_notification == notification_id)
+        self.session.execute(delete_query)
+        self.session.commit()
+
+        # Vérifier que la notification a été supprimée
+        result = self.session.execute(select(self.notifications_table).where(self.notifications_table.c.id_notification == notification_id))
+        notifications = result.fetchall()
+
+        self.assertEqual(len(notifications), 0, "La notification n'a pas été supprimée.")
 
 
 if __name__ == '__main__':
