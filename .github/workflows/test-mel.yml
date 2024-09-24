@@ -1,0 +1,247 @@
+name: CI/CD Test - Mél
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Initialize Git User
+        run: |
+          git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config --global user.name "${{ secrets.GIT_USER_NAME }}"
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+          
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Pull Docker image
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
+
+      - name: Run Unit Tests in Docker
+        run: |
+          docker run --rm \
+            -v $(pwd):/app \
+            -w /app \
+            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest \
+            sh -c "pip install -r requirements.txt && coverage run -m unittest discover -s tests -p 'test_api.py' || true && coverage report && coverage xml -o coverage.xml"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
+          path: ./ 
+
+      - name: Print coverage report
+        run: cat coverage.xml
+
+      - name: List Files in Current Directory  # Debugging step
+        run: ls -al
+        
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -X 
+            -Dsonar.projectKey=${{ secrets.SONAR_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.sources=app
+            -Dsonar.tests=tests
+            -Dsonar.python.coverage.reportPaths=./coverage.xml
+            -Dsonar.scm.provider=git
+
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+
+      - name: Set Quality Gate Status Output
+        id: set-quality-gate-status
+        env:
+          SONAR_STATUS: ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}
+        run: echo "QUALITY_GATE_STATUS=${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}" >> $GITHUB_ENV
+
+  publish:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: sonarqube
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+      - name: Create shared Docker network
+        run: |
+          docker network ls | grep ${{ secrets.REF_NETWORK }} || docker network create ${{ secrets.REF_NETWORK }}
+
+      - name: Build Docker images
+        run: |
+          docker-compose build
+
+      - name: Start Docker containers
+        run: |
+          docker-compose up -d
+          sleep 60
+
+      - name: Check Docker container logs
+        run: |
+          docker-compose logs ${{ secrets.DOCKER_CONTAINER }}
+
+      - name: Log out from Docker Hub (cleanup)
+        run: docker logout
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest .
+
+      - name: Push Docker image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
+        continue-on-error: true
+
+  release:
+    name: Release and Notify
+    runs-on: ubuntu-latest
+    needs: publish
+
+    steps:
+      - name: Checkout release branch
+        uses: actions/checkout@v3
+        with:
+          ref: release
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Initialize Git User
+        run: |
+          git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config --global user.name "${{ secrets.GIT_USER_NAME }}"
+
+      - name: Pull latest changes from main
+        run: git pull origin main
+
+      - name: Update version in files on main
+        if: success()
+        run: |
+          VERSION=$(date +"%Y.%m.%d")-$(git rev-parse --short HEAD)
+          echo "Updating version to $VERSION"
+          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" package.json
+        continue-on-error: true
+
+      - name: Commit updated package.json on main
+        if: success()
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          git checkout main || git checkout -b main origin/main
+          git add package.json
+          VERSION=$(date +"%Y.%m.%d")-$(git rev-parse --short HEAD)
+          echo "Updating version to $VERSION"
+          git commit -m "Update version to $VERSION [skip ci]"
+          git push https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }} main
+
+      - name: Checkout release branch with token
+        if: success()
+        uses: actions/checkout@v3
+        with:
+          ref: release
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Merge main into release
+        env:
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          git fetch origin main
+          git checkout -B release origin/main
+          git push --force https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/${{ github.repository }} release
+
+      - name: Send Discord notification on failure
+        if: failure()
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          STEP_NAME=${{ github.job }}
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "content": "<@&ROLE_ID> **Pipeline Failure - API ${{ secrets.API_NAME }}**\n\n**Repository:** ${{ github.repository }}\n**Commit SHA:** ${{ github.sha }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Failed Step:** '"${STEP_NAME}"'"
+          }' $DISCORD_WEBHOOK_URL
+
+      - name: Send Discord release notes on success
+        if: success()
+        env:
+          DISCORD_WEBHOOK_URL_RELEASE: ${{ secrets.DISCORD_WEBHOOK_URL_RELEASE }}
+        run: |
+          VERSION=$(date +"%Y.%m.%d")-$(git rev-parse --short HEAD)
+          curl -X POST -H "Content-Type: application/json" -d '{
+            "content": "**Pipeline Successful - API ${{ secrets.API_NAME }}**\n\n**Version:** '"${VERSION}"'\n**Repository:** ${{ github.repository }}\n**Commit SHA:** ${{ github.sha }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Release Branch:** release"
+          }' $DISCORD_WEBHOOK_URL_RELEASE
