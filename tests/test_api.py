@@ -31,7 +31,8 @@ class TestDatabase(unittest.TestCase):
         cls.customers_table = Table('Customers', cls.metadata, autoload_with=cls.engine)
         cls.addresses_table = Table('Addresses', cls.metadata, autoload_with=cls.engine)
         cls.companies_table = Table('Companies', cls.metadata, autoload_with=cls.engine)
-
+        # à finir
+         
     @classmethod
     def tearDownClass(cls):
         cls.session.close()
