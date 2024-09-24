@@ -10,7 +10,7 @@ client = TestClient(app)
 
 class TestLogin(unittest.TestCase):
 
-    @patch("app.database.get_db")
+    @patch("app.main.get_db")
     def test_login_success(self, mock_get_db):
         # Mocking a database session and customer
         mock_db = MagicMock()
@@ -43,7 +43,7 @@ class TestLogin(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("access_token", response.json())
 
-    @patch("app.database.get_db")  # Mock the get_db dependency
+    @patch("app.main.get_db")  # Mock the get_db dependency
     def test_login_invalid_credentials(self, mock_get_db):
         # Mocking a database session and customer
         mock_db = MagicMock()
@@ -76,7 +76,7 @@ class TestLogin(unittest.TestCase):
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(response.json()["detail"], "Invalid email or password")
 
-    @patch("app.database.get_db")  # Mock the get_db dependency
+    @patch("app.main.get_db")  # Mock the get_db dependency
     def test_login_customer_not_found(self, mock_get_db):
         # Mocking a database session where no customer is found
         mock_db = MagicMock()
