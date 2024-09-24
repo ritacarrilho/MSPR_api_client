@@ -12,7 +12,7 @@ class TestDatabase(unittest.TestCase):
         cls.Session = sessionmaker(bind=cls.engine)
         cls.session = cls.Session()
         cls.metadata = MetaData()
-                
+                        
         # Simuler les tables
         cls.customers_table = Table('Customers', cls.metadata,
                 Column('id_customer', Integer, primary_key=True),
@@ -439,7 +439,7 @@ class TestDatabase(unittest.TestCase):
         )
         result = self.session.execute(select_query).fetchone()
         
-        self.assertIsNone(result, "La relation client-entreprise devrait avoir été supprimée.")
+        self.assertIsNone(result, "La relation client-entreprise devrait avoir été supprimée.") 
 
 if __name__ == '__main__':
     unittest.main()
