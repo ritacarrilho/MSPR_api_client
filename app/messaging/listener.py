@@ -3,21 +3,12 @@ import asyncio
 import uuid
 import json
 import aio_pika
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
-
-BROKER_USER = os.getenv("BROKER_USER")
-BROKER_PASSWORD = os.getenv('BROKER_PASSWORD')
-BROKER_HOST = os.getenv('BROKER_HOST')
-BROKER_PORT = os.getenv('BROKER_PORT')
-BROKER_VIRTUAL_HOST = os.getenv('BROKER_VIRTUAL_HOST')
 
 async def fetch_customer_orders(customer_id: int):
     """Fetch orders for a given customer ID by communicating with the Order service via RabbitMQ."""
     try:
-        connection = await aio_pika.connect_robust(f"amqp://{BROKER_USER}:{BROKER_PASSWORD}@{BROKER_HOST}/") 
+        connection = await aio_pika.connect_robust("amqp://user:password@rabbitmq/")
         async with connection:
             channel = await connection.channel()
             result_queue = await channel.declare_queue('', exclusive=True, auto_delete=True)
