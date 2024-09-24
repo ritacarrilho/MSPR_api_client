@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, patch
-from sqlalchemy import create_engine, MetaData, Table, insert, select, update, delete, Column, Integer, DateTime, String, Boolean
+from sqlalchemy import create_engine, MetaData, Table, insert, select, update, delete, Column, Integer, DateTime, String, Boolean, ForeignKey
 from sqlalchemy.orm import sessionmaker
 import os
 
@@ -31,7 +31,19 @@ class TestDatabase(unittest.TestCase):
                 Column('loyalty_points', Integer),
                 Column('password_hash', String)
             )
-        cls.addresses_table = Table('Addresses', cls.metadata)
+        cls.addresses_table = Table('Addresses', cls.metadata,
+                    Column('id_address', Integer, primary_key=True),
+                    Column('address_line1', String),
+                    Column('address_line2', String),
+                    Column('city', String),
+                    Column('state', String),
+                    Column('postal_code', String),
+                    Column('country', String),
+                    Column('address_type', Integer),
+                    Column('created_at', DateTime),
+                    Column('updated_at', DateTime),
+                    Column('id_customer', Integer, ForeignKey('Customers.id_customer'))
+                )        
         cls.companies_table = Table('Companies', cls.metadata)
 
     @classmethod
