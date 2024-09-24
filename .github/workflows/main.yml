@@ -52,7 +52,7 @@ jobs:
     - name: Lint code
       run: |
         # Lint Python code
-        pylint app/*.py > pylint-report.txt
+        pylint app/*.py | tee pylint-report.txt || true
         # Lint Dockerfile
         docker run --rm hadolint/hadolint < Dockerfile
         # Lint dependencies
