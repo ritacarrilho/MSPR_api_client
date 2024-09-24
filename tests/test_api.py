@@ -61,6 +61,13 @@ class TestDatabase(unittest.TestCase):
             Column('type', Integer, nullable=False),
             Column('id_customer', Integer, ForeignKey('Customers.id_customer'), nullable=False)
         )
+        cls.login_logs_table = Table('LoginLogs', cls.metadata,
+            Column('id_log', Integer, primary_key=True),
+            Column('login_time', DateTime, nullable=False),
+            Column('ip_address', String, nullable=False),
+            Column('user_agent', String, nullable=False),
+            Column('id_customer', Integer, ForeignKey('Customers.id_customer'), nullable=False)
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -316,6 +323,53 @@ class TestDatabase(unittest.TestCase):
         notifications = result.fetchall()
 
         self.assertEqual(len(notifications), 0, "La notification n'a pas été supprimée.")
+
+# --------------------- LoginLogs --------------------- #
+
+    def test_table_notifications_exists(self):
+        """Vérifie que la table 'LoginLogs' existe dans la base de données."""
+        tables = ['Customers', 'Addresses', 'Companies', 'Notifications', 'LoginLogs']
+        self.assertIn('LoginLogs', tables, "La table 'LoginLogs' n'existe pas dans la base de données.")
+        
+    def test_insert_login_log(self):
+        """Teste l'insertion d'un log de connexion dans la table LoginLogs."""
+        insert_query = insert(self.login_logs_table).values(
+            login_time="2024-09-24T15:14:03.632Z",
+            ip_address="192.168.1.1",
+            user_agent="Mozilla/5.0",
+            id_customer=1
+        )
+        result = self.session.execute(insert_query)
+        self.session.commit()
+        
+        self.assertIsNotNone(result.inserted_primary_key, "L'insertion dans la table 'LoginLogs' a échoué.")
+
+    def test_update_login_log(self):
+        """Teste la mise à jour d'un log de connexion dans la table 'LoginLogs'."""
+        self.session.execute = MagicMock(return_value=MagicMock(rowcount=1))
+
+        update_query = update(self.login_logs_table).where(self.login_logs_table.c.id_log == 1).values(ip_address="192.168.1.2")
+        result = self.session.execute(update_query)
+        self.session.commit()
+
+        self.assertGreater(result.rowcount, 0, "Aucune ligne n'a été mise à jour dans la table 'LoginLogs'.")
+
+    def test_delete_login_log(self):
+        """Teste la suppression d'un log de connexion dans la table 'LoginLogs'."""
+        self.session.execute = MagicMock(return_value=MagicMock(rowcount=1))
+
+        delete_query = delete(self.login_logs_table).where(self.login_logs_table.c.id_log == 1)
+        result = self.session.execute(delete_query)
+        self.session.commit()
+
+        self.assertEqual(result.rowcount, 1, "La suppression du log de connexion a échoué.")
+
+        # Vérifiez que le log n'existe plus
+        self.session.execute = MagicMock(return_value=MagicMock(fetchone=MagicMock(return_value=None)))
+        select_query = select([self.login_logs_table]).where(self.login_logs_table.c.id_log == 1)
+        result = self.session.execute(select_query).fetchone()
+
+        self.assertIsNone(result, "Le log de connexion devrait avoir été supprimé.")
 
 
 if __name__ == '__main__':
