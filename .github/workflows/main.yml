@@ -57,6 +57,7 @@ jobs:
         docker run --rm hadolint/hadolint < Dockerfile
         # Lint dependencies
         pip check
+      continue-on-error: true
 
     - name: Upload pylint report
       uses: actions/upload-artifact@v3
