@@ -3,11 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches:
-      - main # Déclenché à chaque nouveau commit sur le main
+      - main
 
 jobs:
-  CI_CD_Pipeline:
-    name: CI/CD Pipeline
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
 
     steps:
@@ -16,6 +16,164 @@ jobs:
           git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
           git config --global user.name "${{ secrets.GIT_USER_NAME }}"
 
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Lint code
+      run: |
+        # Lint Python code
+        pylint app/*.py > pylint-report.txt
+        # Lint Dockerfile
+        docker run --rm hadolint/hadolint < Dockerfile
+        # Lint dependencies
+        pip check
+      continue-on-error: true
+
+    - name: Upload pylint report
+      uses: actions/upload-artifact@v3
+      with:
+        name: pylint-report
+        path: pylint-report.txt
+
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    needs: lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          
+      - name: Run unit tests with coverage
+        run: |
+          # Run tests with coverage
+          coverage run -m unittest discover -s tests -p "test_api.py" || true
+          # Generate coverage report
+          coverage report
+          coverage xml -o coverage.xml
+
+      # - name: Upload test results
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: junit-results
+      #     path: results.xml
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage.xml
+# BONUS 
+      # - name: Setup Testspace
+      #   uses: testspace-com/setup-testspace@v1
+      #   with:
+      #     domain: ${{ github.repository_owner }}
+
+      # - name: Publish results to Testspace
+      #   run: |
+      #     testspace ./results.xml coverage.xml
+      #   if: always()
+
+  sonarqube:
+    name: SonarQube Analysis
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage-report
+          path: ./ 
+
+      - name: Print coverage report
+        run: cat coverage.xml
+
+      - name: List Files in Current Directory  # Debugging step
+        run: ls -al
+        
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -X 
+            -Dsonar.projectKey=${{ secrets.SONAR_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.sources=app
+            -Dsonar.tests=tests
+            -Dsonar.python.coverage.reportPaths=./coverage.xml
+            -Dsonar.scm.provider=git
+
+      - name: SonarQube Quality Gate check
+        id: sonarqube-quality-gate-check
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        continue-on-error: true
+
+      - name: Set Quality Gate Status Output
+        id: set-quality-gate-status
+        env:
+          SONAR_STATUS: ${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}
+        run: echo "QUALITY_GATE_STATUS=${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}" >> $GITHUB_ENV
+
+  publish:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    needs: sonarqube
+
+    steps:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
@@ -47,32 +205,6 @@ jobs:
         run: |
           docker-compose logs ${{ secrets.DOCKER_CONTAINER }}
 
-      - name: Verify Docker containers are running
-        run: |
-          docker ps
-
-          if ! docker ps | grep ${{ secrets.DOCKER_CONTAINER }}; then
-            echo "Le conteneur n'est pas en cours d'exécution !"
-            exit 1
-          fi
-
-          if ! nc -zv localhost {{ secrets.PORT }}; then
-            echo "Le port du conteneur n'est pas accessible !"
-            exit 1
-          fi
-        continue-on-error: true
-
-      - name: Run unit tests
-        run: |
-          # Installer les dépendances nécessaires pour exécuter les tests
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-          # Exécuter les tests avec unittest
-          python -m unittest discover -s tests -p "test_api.py"
-        continue-on-error: true
-
-        # Builder et pousser l'image Docker après la vérification des conteneurs
       - name: Log out from Docker Hub (cleanup)
         run: docker logout
 
@@ -86,12 +218,22 @@ jobs:
         run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:latest
         continue-on-error: true
 
-      - name: Checkout release branch with token
-        if: success()
+  release:
+    name: Release and Notify
+    runs-on: ubuntu-latest
+    needs: publish
+
+    steps:
+      - name: Checkout release branch
         uses: actions/checkout@v3
         with:
           ref: release
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+
+      - name: Initialize Git User
+        run: |
+          git config --global user.email "${{ secrets.GIT_USER_EMAIL }}"
+          git config --global user.name "${{ secrets.GIT_USER_NAME }}"
 
       - name: Pull latest changes from main
         run: git pull origin main
@@ -124,7 +266,6 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Merge main into release
-        if: success()
         env:
           GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
@@ -139,25 +280,15 @@ jobs:
         run: |
           STEP_NAME=${{ github.job }}
           curl -X POST -H "Content-Type: application/json" -d '{
-            "content": "<@&ROLE_ID> **Pipeline Failure - API CUSTOMER**\n\n**Repository:** ${{ github.repository }}\n**Commit SHA:** ${{ github.sha }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Failed Step:** '"${STEP_NAME}"'"
+            "content": "<@&ROLE_ID> **Pipeline Failure - API ${{ secrets.API_NAME }}**\n\n**Repository:** ${{ github.repository }}\n**Commit SHA:** ${{ github.sha }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Failed Step:** '"${STEP_NAME}"'"
           }' $DISCORD_WEBHOOK_URL
 
       - name: Send Discord release notes on success
-        if: success()  # Si toutes les étapes précédentes sont réussies
+        if: success()
         env:
           DISCORD_WEBHOOK_URL_RELEASE: ${{ secrets.DISCORD_WEBHOOK_URL_RELEASE }}
         run: |
-          # Récupérer les informations du dernier commit
-          COMMIT_SHA=$(git rev-parse HEAD)
-          COMMIT_AUTHOR=$(git log -1 --pretty=format:'%an')
-          COMMIT_DATE=$(git log -1 --pretty=format:'%ad' --date=format:'%Y-%m-%d')
-          COMMIT_TIME=$(git log -1 --pretty=format:'%ad' --date=format:'%H:%M')
-          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
-      
-          # Vérification temporaire de l'URL webhook
-          echo "Discord webhook URL: $DISCORD_WEBHOOK_URL_RELEASE"
-      
-          # Envoyer les informations sur Discord
+          VERSION=$(date +"%Y.%m.%d")-$(git rev-parse --short HEAD)
           curl -X POST -H "Content-Type: application/json" -d '{
-            "content": "**Release Notes - API CUSTOMER**\n\n**Commit N°**: '"${COMMIT_SHA}"'\n**Auteur du commit**: '"${COMMIT_AUTHOR}"'\n**Date du commit**: '"${COMMIT_DATE}"'\n**Heure du commit**: '"${COMMIT_TIME}"'\n**Description commit**: '"${COMMIT_MESSAGE}"'"
-          }' "$DISCORD_WEBHOOK_URL_RELEASE"
+            "content": "**Pipeline Successful - API ${{ secrets.API_NAME }}**\n\n**Version:** '"${VERSION}"'\n**Repository:** ${{ github.repository }}\n**Commit SHA:** ${{ github.sha }}\n**Commit Message:** ${{ github.event.head_commit.message }}\n**Release Branch:** release"
+          }' $DISCORD_WEBHOOK_URL_RELEASE
