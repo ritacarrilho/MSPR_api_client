@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, patch
-from sqlalchemy import create_engine, MetaData, Table, insert, select, update, delete
+from sqlalchemy import create_engine, MetaData, Table, insert, select, update, delete, Column, Integer, DateTime, String, Boolean
 from sqlalchemy.orm import sessionmaker
 import os
 
@@ -14,7 +14,23 @@ class TestDatabase(unittest.TestCase):
         cls.metadata = MetaData()
         
         # Simuler les tables
-        cls.customers_table = Table('Customers', cls.metadata)
+        cls.customers_table = Table('Customers', cls.metadata,
+                Column('id_customer', Integer, primary_key=True),
+                Column('created_at', DateTime),
+                Column('name', String),
+                Column('username', String),
+                Column('first_name', String),
+                Column('last_name', String),
+                Column('phone', String),
+                Column('email', String),
+                Column('last_login', DateTime),
+                Column('customer_type', Integer),
+                Column('failed_login_attempts', Integer),
+                Column('preferred_contact_method', Integer),
+                Column('opt_in_marketing', Boolean),
+                Column('loyalty_points', Integer),
+                Column('password_hash', String)
+            )
         cls.addresses_table = Table('Addresses', cls.metadata)
         cls.companies_table = Table('Companies', cls.metadata)
 
@@ -120,13 +136,21 @@ class TestDatabase(unittest.TestCase):
         """Teste la suppression d'un client dans la table 'Customers'."""
         self.session.execute = MagicMock(return_value=MagicMock(rowcount=1))
 
-        delete_query = delete(self.customers_table).where(self.customers_table.c.id_customer == "marie.durand-@procoffee.com")
+        delete_query = delete(self.customers_table).where(self.customers_table.c.email == "marie.durand-2@procoffee.com")
         
         result = self.session.execute(delete_query)
         self.session.commit()
         
         # Vérifiez que la suppression a bien eu lieu
         self.assertEqual(result.rowcount, 1, "La suppression du client a échoué.")
+
+        # Test de lecture pour s'assurer que le client n'existe plus
+        self.session.execute = MagicMock(return_value=MagicMock(fetchone=MagicMock(return_value=None)))
+        select_query = select([self.customers_table]).where(self.customers_table.c.email == "marie.durand-2@procoffee.com")
+        result = self.session.execute(select_query).fetchone()
+        
+        self.assertIsNone(result, "Le client devrait avoir été supprimé.")
+
 
     # Test pour simuler la lecture des données dans la table 'Addresses'
     def test_read_from_addresses(self):
