@@ -33,7 +33,8 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    
+    needs: setup
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -66,7 +67,7 @@ jobs:
   test:
     name: Run Unit Tests
     runs-on: ubuntu-latest
-    needs: setup
+    needs: lint
 
     steps:
       - name: Checkout code
