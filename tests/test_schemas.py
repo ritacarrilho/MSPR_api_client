@@ -7,7 +7,6 @@ from ..app.schemas import (
     AddressCreate, AddressUpdate, LoginRequest, OrderProductSchema, CustomerOrdersResponse
 )
 
-
 class TestSchemas(unittest.TestCase):
 
     def setUp(self):

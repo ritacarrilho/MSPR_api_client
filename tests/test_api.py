@@ -441,41 +441,5 @@ class TestDatabase(unittest.TestCase):
         
         self.assertIsNone(result, "La relation client-entreprise devrait avoir été supprimée.")
 
-# --------------------- Auth --------------------- #
-
-    # def test_user_login(self):
-    #     """Teste la connexion d'un utilisateur avec email et mot de passe."""
-    #     payload = {
-    #         "email": "admin@email.com",  
-    #         "password": "toto"      
-    #     }
-
-    #     response = self.client.post("/login", json=payload)  
-
-    #     # Vérifiez que la réponse a un statut 200 OK
-    #     self.assertEqual(response.status_code, 200, "La connexion a échoué.")
-
-    #     # Vérifiez que la réponse contient les données attendues (token)
-    #     response_data = response.json()
-    #     self.assertIn("access_token", response_data, "Le token n'est pas présent dans la réponse.")
-    #     self.assertIsInstance(response_data["access_token"], str, "Le token doit être une chaîne de caractères.")
-
-    # def test_user_login_invalid(self):
-    #     """Teste la connexion d'un utilisateur avec des informations invalides."""
-    #     payload = {
-    #         "email": "wrong@example.com",  # Email incorrect
-    #         "password": "wrongpassword"    # Mot de passe incorrect
-    #     }
-
-    #     response = self.client.post("/login", json=payload)
-
-    #     # Vérifiez que la réponse a un statut 401 Unauthorized
-    #     self.assertEqual(response.status_code, 401, "La connexion aurait dû échouer.")
-
-    #     # Vérifiez que la réponse contient un message d'erreur
-    #     response_data = response.json()
-    #     self.assertIn("detail", response_data, "Le message d'erreur n'est pas présent dans la réponse.")
-    #     self.assertEqual(response_data["detail"], "Invalid credentials", "Le message d'erreur est incorrect.")
-
 if __name__ == '__main__':
     unittest.main()
