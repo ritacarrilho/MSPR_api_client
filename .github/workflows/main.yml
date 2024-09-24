@@ -87,7 +87,7 @@ jobs:
       - name: Run unit tests with coverage
         run: |
           # Run tests with coverage
-          coverage run -m unittest discover -s tests -p "test_api.py" || true
+          coverage run --source=app -m unittest discover -s tests -p "test_api.py" || true
           # Generate coverage report
           coverage report
           coverage xml -o coverage.xml
