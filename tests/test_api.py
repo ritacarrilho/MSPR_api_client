@@ -50,8 +50,22 @@ class TestDatabase(unittest.TestCase):
         """Teste l'insertion d'un client dans la table 'Customers'."""
         self.session.execute = MagicMock(return_value=MagicMock(inserted_primary_key=[1]))
         insert_query = insert(self.customers_table).values(
-            name="John Doe", email="john.doe@example.com"
+            created_at="2024-09-24T14:32:00.197Z",
+            name="ProBarista-2",
+            username="barista_pro-2",
+            first_name="Marie",
+            last_name="Durand",
+            phone="123456789",
+            email="marie.durand-2@procoffee.com",
+            last_login="2024-09-24T14:32:00.197Z",
+            customer_type=2,
+            failed_login_attempts=0,
+            preferred_contact_method=2,
+            opt_in_marketing=False,
+            loyalty_points=0,
+            password_hash="Hello"
         )
+        
         result = self.session.execute(insert_query)
         self.session.commit()
 
@@ -84,18 +98,18 @@ class TestDatabase(unittest.TestCase):
     # Test pour simuler la lecture des données dans la table 'Customers'
     def test_read_from_customers(self):
         """Teste la lecture des données insérées dans la table 'Customers'."""
-        self.session.execute = MagicMock(return_value=MagicMock(fetchone=MagicMock(return_value={'email': "john.doe@example.com"})))
-        select_query = select([self.customers_table]).where(self.customers_table.c.email == "john.doe@example.com")
+        self.session.execute = MagicMock(return_value=MagicMock(fetchone=MagicMock(return_value={'email': "marie.durand-2@procoffee.com"})))
+        select_query = select([self.customers_table]).where(self.customers_table.c.email == "marie.durand-2@procoffee.com")
         result = self.session.execute(select_query).fetchone()
 
         self.assertIsNotNone(result, "Aucune donnée trouvée dans la table 'Customers'.")
-        self.assertEqual(result['email'], "john.doe@example.com", "Le champ 'email' est incorrect.")
+        self.assertEqual(result['email'], "marie.durand-2@procoffee.com", "Le champ 'email' est incorrect.")
 
     # Test pour simuler la mise à jour des données dans la table 'Customers'
     def test_update_customers(self):
         """Teste la mise à jour d'un client dans la table 'Customers'."""
         self.session.execute = MagicMock(return_value=MagicMock(rowcount=1))
-        update_query = update(self.customers_table).where(self.customers_table.c.email == "john.doe@example.com").values(name="Jane Doe")
+        update_query = update(self.customers_table).where(self.customers_table.c.email == "marie.durand-2@procoffee.com").values(name="ProBarista-2")
         result = self.session.execute(update_query)
         self.session.commit()
 
@@ -105,11 +119,14 @@ class TestDatabase(unittest.TestCase):
     def test_delete_from_customers(self):
         """Teste la suppression d'un client dans la table 'Customers'."""
         self.session.execute = MagicMock(return_value=MagicMock(rowcount=1))
-        delete_query = delete(self.customers_table).where(self.customers_table.c.email == "john.doe@example.com")
+
+        delete_query = delete(self.customers_table).where(self.customers_table.c.id_customer == "marie.durand-@procoffee.com")
+        
         result = self.session.execute(delete_query)
         self.session.commit()
-
-        self.assertGreater(result.rowcount, 0, "Aucune ligne n'a été supprimée dans la table 'Customers'.")
+        
+        # Vérifiez que la suppression a bien eu lieu
+        self.assertEqual(result.rowcount, 1, "La suppression du client a échoué.")
 
     # Test pour simuler la lecture des données dans la table 'Addresses'
     def test_read_from_addresses(self):
