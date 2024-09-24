@@ -1,7 +1,7 @@
 import unittest
 from datetime import datetime
 from pydantic import ValidationError
-from shemcas import (
+from ..app.schemas import (
     CustomerCreate, CustomerUpdate, CompanyCreate, CompanyUpdate, 
     FeedbackCreate, FeedbackUpdate, NotificationCreate, NotificationUpdate,
     AddressCreate, AddressUpdate, LoginRequest, OrderProductSchema, CustomerOrdersResponse
