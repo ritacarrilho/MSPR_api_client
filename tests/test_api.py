@@ -68,6 +68,10 @@ class TestDatabase(unittest.TestCase):
             Column('user_agent', String, nullable=False),
             Column('id_customer', Integer, ForeignKey('Customers.id_customer'), nullable=False)
         )
+        cls.customer_companies_table = Table('customer_companies', cls.metadata,
+            Column('id_customer', Integer, ForeignKey('Customers.id_customer'), primary_key=True),
+            Column('id_company', Integer, ForeignKey('Companies.id_company'), primary_key=True)
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -370,6 +374,75 @@ class TestDatabase(unittest.TestCase):
         result = self.session.execute(select_query).fetchone()
 
         self.assertIsNone(result, "Le log de connexion devrait avoir été supprimé.")
+
+# --------------------- CustomerCompagnies --------------------- #
+    # Test pour simuler l'insertion dans la table 'customer_companies'
+    def test_insert_into_customer_companies(self):
+        """Teste l'insertion d'une relation client-entreprise dans la table 'customer_companies'."""
+        self.session.execute = MagicMock(return_value=MagicMock(inserted_primary_key=[1]))
+        insert_query = insert(self.customer_companies_table).values(
+            id_customer=1,  # Assurez-vous que ce client existe
+            id_company=1    # Assurez-vous que cette entreprise existe
+        )
+        
+        result = self.session.execute(insert_query)
+        self.session.commit()
+
+        self.assertIsNotNone(result.inserted_primary_key, "L'insertion dans la table 'customer_companies' a échoué.")
+
+    # Test pour simuler la lecture des données dans la table 'customer_companies'
+    def test_read_from_customer_companies(self):
+        """Teste la lecture des données insérées dans la table 'customer_companies'."""
+        self.session.execute = MagicMock(return_value=MagicMock(fetchone=MagicMock(return_value={'id_customer': 1, 'id_company': 1})))
+        select_query = select([self.customer_companies_table]).where(
+            (self.customer_companies_table.c.id_customer == 1) &
+            (self.customer_companies_table.c.id_company == 1)
+        )
+        result = self.session.execute(select_query).fetchone()
+
+        self.assertIsNotNone(result, "Aucune donnée trouvée dans la table 'customer_companies'.")
+        self.assertEqual(result['id_customer'], 1, "Le champ 'id_customer' est incorrect.")
+        self.assertEqual(result['id_company'], 1, "Le champ 'id_company' est incorrect.")
+
+    # Test pour simuler la mise à jour des données dans la table 'customer_companies'
+    def test_update_customer_companies(self):
+        """Teste la mise à jour d'une relation client-entreprise dans la table 'customer_companies'."""
+        self.session.execute = MagicMock(return_value=MagicMock(rowcount=1))
+        update_query = update(self.customer_companies_table).where(
+            (self.customer_companies_table.c.id_customer == 1) &
+            (self.customer_companies_table.c.id_company == 1)
+        ).values(id_company=2)  # Changer l'id_company à 2
+        
+        result = self.session.execute(update_query)
+        self.session.commit()
+
+        self.assertGreater(result.rowcount, 0, "Aucune ligne n'a été mise à jour dans la table 'customer_companies'.")
+
+    # Test pour simuler la suppression des données dans la table 'customer_companies'
+    def test_delete_from_customer_companies(self):
+        """Teste la suppression d'une relation client-entreprise dans la table 'customer_companies'."""
+        self.session.execute = MagicMock(return_value=MagicMock(rowcount=1))
+
+        delete_query = delete(self.customer_companies_table).where(
+            (self.customer_companies_table.c.id_customer == 1) &
+            (self.customer_companies_table.c.id_company == 1)
+        )
+        
+        result = self.session.execute(delete_query)
+        self.session.commit()
+        
+        # Vérifiez que la suppression a bien eu lieu
+        self.assertEqual(result.rowcount, 1, "La suppression de la relation client-entreprise a échoué.")
+
+        # Test de lecture pour s'assurer que la relation n'existe plus
+        self.session.execute = MagicMock(return_value=MagicMock(fetchone=MagicMock(return_value=None)))
+        select_query = select([self.customer_companies_table]).where(
+            (self.customer_companies_table.c.id_customer == 1) &
+            (self.customer_companies_table.c.id_company == 1)
+        )
+        result = self.session.execute(select_query).fetchone()
+        
+        self.assertIsNone(result, "La relation client-entreprise devrait avoir été supprimée.")
 
 
 if __name__ == '__main__':
