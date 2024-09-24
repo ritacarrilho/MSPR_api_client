@@ -12,7 +12,7 @@ class TestDatabase(unittest.TestCase):
         cls.Session = sessionmaker(bind=cls.engine)
         cls.session = cls.Session()
         cls.metadata = MetaData()
-        
+                
         # Simuler les tables
         cls.customers_table = Table('Customers', cls.metadata,
                 Column('id_customer', Integer, primary_key=True),
@@ -376,7 +376,7 @@ class TestDatabase(unittest.TestCase):
         self.assertIsNone(result, "Le log de connexion devrait avoir été supprimé.")
 
 # --------------------- CustomerCompagnies --------------------- #
-    # Test pour simuler l'insertion dans la table 'customer_companies'
+
     def test_insert_into_customer_companies(self):
         """Teste l'insertion d'une relation client-entreprise dans la table 'customer_companies'."""
         self.session.execute = MagicMock(return_value=MagicMock(inserted_primary_key=[1]))
@@ -390,7 +390,6 @@ class TestDatabase(unittest.TestCase):
 
         self.assertIsNotNone(result.inserted_primary_key, "L'insertion dans la table 'customer_companies' a échoué.")
 
-    # Test pour simuler la lecture des données dans la table 'customer_companies'
     def test_read_from_customer_companies(self):
         """Teste la lecture des données insérées dans la table 'customer_companies'."""
         self.session.execute = MagicMock(return_value=MagicMock(fetchone=MagicMock(return_value={'id_customer': 1, 'id_company': 1})))
@@ -404,7 +403,6 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(result['id_customer'], 1, "Le champ 'id_customer' est incorrect.")
         self.assertEqual(result['id_company'], 1, "Le champ 'id_company' est incorrect.")
 
-    # Test pour simuler la mise à jour des données dans la table 'customer_companies'
     def test_update_customer_companies(self):
         """Teste la mise à jour d'une relation client-entreprise dans la table 'customer_companies'."""
         self.session.execute = MagicMock(return_value=MagicMock(rowcount=1))
@@ -418,7 +416,6 @@ class TestDatabase(unittest.TestCase):
 
         self.assertGreater(result.rowcount, 0, "Aucune ligne n'a été mise à jour dans la table 'customer_companies'.")
 
-    # Test pour simuler la suppression des données dans la table 'customer_companies'
     def test_delete_from_customer_companies(self):
         """Teste la suppression d'une relation client-entreprise dans la table 'customer_companies'."""
         self.session.execute = MagicMock(return_value=MagicMock(rowcount=1))
@@ -444,6 +441,41 @@ class TestDatabase(unittest.TestCase):
         
         self.assertIsNone(result, "La relation client-entreprise devrait avoir été supprimée.")
 
+# --------------------- Auth --------------------- #
+
+    # def test_user_login(self):
+    #     """Teste la connexion d'un utilisateur avec email et mot de passe."""
+    #     payload = {
+    #         "email": "admin@email.com",  
+    #         "password": "toto"      
+    #     }
+
+    #     response = self.client.post("/login", json=payload)  
+
+    #     # Vérifiez que la réponse a un statut 200 OK
+    #     self.assertEqual(response.status_code, 200, "La connexion a échoué.")
+
+    #     # Vérifiez que la réponse contient les données attendues (token)
+    #     response_data = response.json()
+    #     self.assertIn("access_token", response_data, "Le token n'est pas présent dans la réponse.")
+    #     self.assertIsInstance(response_data["access_token"], str, "Le token doit être une chaîne de caractères.")
+
+    # def test_user_login_invalid(self):
+    #     """Teste la connexion d'un utilisateur avec des informations invalides."""
+    #     payload = {
+    #         "email": "wrong@example.com",  # Email incorrect
+    #         "password": "wrongpassword"    # Mot de passe incorrect
+    #     }
+
+    #     response = self.client.post("/login", json=payload)
+
+    #     # Vérifiez que la réponse a un statut 401 Unauthorized
+    #     self.assertEqual(response.status_code, 401, "La connexion aurait dû échouer.")
+
+    #     # Vérifiez que la réponse contient un message d'erreur
+    #     response_data = response.json()
+    #     self.assertIn("detail", response_data, "Le message d'erreur n'est pas présent dans la réponse.")
+    #     self.assertEqual(response_data["detail"], "Invalid credentials", "Le message d'erreur est incorrect.")
 
 if __name__ == '__main__':
     unittest.main()
