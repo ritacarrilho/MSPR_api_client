@@ -3,18 +3,25 @@ import subprocess
 from sqlalchemy import create_engine, MetaData, Table, insert, select, update, delete, inspect
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
+import os
+
 
 class TestDatabase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Exécuter le script copy_db.py pour préparer la base de données de test
-        try:
-            result = subprocess.run(["python", "copy_db.py"], check=True, text=True, capture_output=True)
-            print("Script copy_db.py exécuté avec succès.")
-        except subprocess.CalledProcessError as e:
-            raise RuntimeError(f"Erreur lors de l'exécution de copy_db.py : {e}")
+        
+        # Charger les variables d'environnement
+        load_dotenv()
+        
+        # Récupérer l'URL de la base de données
+        database_url = os.getenv("DATABASE_URL")
 
-        cls.engine = create_engine("mysql+mysqlconnector://root:@localhost:3306/test_customer_db")
+        if not database_url:
+            raise RuntimeError("DATABASE_URL n'est pas définie dans le fichier .env")
+
+        # Connexion à la base de données
+        cls.engine = create_engine(database_url)
         cls.Session = sessionmaker(bind=cls.engine)
         cls.session = cls.Session()
         cls.metadata = MetaData(bind=cls.engine)
@@ -24,7 +31,6 @@ class TestDatabase(unittest.TestCase):
         cls.customers_table = Table('Customers', cls.metadata, autoload_with=cls.engine)
         cls.addresses_table = Table('Addresses', cls.metadata, autoload_with=cls.engine)
         cls.companies_table = Table('Companies', cls.metadata, autoload_with=cls.engine)
-        # Ajouter d'autres tables si nécessaire
 
     @classmethod
     def tearDownClass(cls):
