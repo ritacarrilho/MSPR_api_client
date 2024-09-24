@@ -102,6 +102,9 @@ jobs:
       - name: Print coverage report
         run: cat coverage.xml
 
+      - name: List Files in Current Directory  # Debugging step
+        run: ls -al
+        
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
@@ -113,7 +116,7 @@ jobs:
             -Dsonar.organization=${{ secrets.SONAR_ORG }}
             -Dsonar.sources=app
             -Dsonar.tests=tests
-            -Dsonar.python.coverage.reportPaths=coverage.xml
+            -Dsonar.python.coverage.reportPaths=./coverage.xml
             -Dsonar.scm.provider=git
 
       - name: SonarQube Quality Gate check
