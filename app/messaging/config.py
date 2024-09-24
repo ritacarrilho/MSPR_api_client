@@ -3,6 +3,7 @@ import os
 import logging
 import time
 import aio_pika
+import asyncio
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,7 +19,6 @@ MAX_RETRIES = 5
 
 logging.basicConfig(level=logging.INFO)
 
-# Utility function to establish RabbitMQ connection
 async def establish_rabbitmq_connection():
     try:
         connection = await aio_pika.connect_robust(

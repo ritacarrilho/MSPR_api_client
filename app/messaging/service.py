@@ -2,6 +2,7 @@ import asyncio
 import aio_pika
 import logging
 import uuid
+import json
 from .config import establish_rabbitmq_connection
 from .publisher import send_order_request
 from .consumer import handle_order_response, handle_response
@@ -15,24 +16,15 @@ async def fetch_customer_orders(customer_id: int):
         async with connection:
             channel = await connection.channel()
 
-            # Declare a temporary queue to receive the response
             result_queue = await channel.declare_queue('', exclusive=True, auto_delete=True)
             callback_queue = result_queue.name
             logging.info(f"Temporary callback queue declared: {callback_queue}")
-
-            # Initialize the response future
             response_future = asyncio.Future()
-
-            # Define the correlation ID to track responses
             correlation_id = str(uuid.uuid4())
 
-            # Set up the consumer for the callback queue
             await result_queue.consume(lambda message: handle_order_response(message, response_future, correlation_id))
-
-            # Send the request to the Order service
             await send_order_request(channel, customer_id, callback_queue, correlation_id)
 
-            # Wait for the response with a timeout
             try:
                 orders_data = await asyncio.wait_for(response_future, timeout=10)
                 return orders_data
@@ -53,17 +45,14 @@ async def fetch_customer_orders(customer_id: int):
 async def fetch_order_products(customer_id: int, order_id: int):
     """Fetch products for a given customer order by communicating with the Order and Product services."""
     try:
-        # Step 1: Fetch product IDs from the Order service
         order_service_response = await fetch_order_details(customer_id, order_id)
         print(f"Order service response: {order_service_response}")
         
-        # Here, ensure you're handling the product IDs correctly
         product_ids = order_service_response.get('products', [])
         print(f"product IDs: {product_ids}")
         if not isinstance(product_ids, list):
             raise ValueError(f"Expected a list of product IDs, got {type(product_ids)}")
 
-        # Step 2: Fetch product details from the Product service
         product_details = await fetch_product_details(product_ids)
         print(f"product details from service: {product_details}")
 
@@ -83,10 +72,8 @@ async def fetch_order_details(customer_id: int, order_id: int):
             correlation_id = str(uuid.uuid4())
             response_future = asyncio.Future()
 
-            # Subscribe to the callback queue
             await result_queue.consume(lambda message: handle_response(message, response_future, correlation_id, 'products'))
 
-            # Send request to Order service
             await send_message_to_service(
                 channel=channel,
                 routing_key='order.products.request',
@@ -100,7 +87,7 @@ async def fetch_order_details(customer_id: int, order_id: int):
                 logging.info(f"Product IDs received: {product_ids}")
 
                 if isinstance(product_ids, list):
-                    return {'products': product_ids}  # Return products in expected format
+                    return {'products': product_ids}
                 else:
                     raise ValueError("Unexpected response format from order service")
 
@@ -121,10 +108,7 @@ async def fetch_product_details(product_ids: list):
         correlation_id = str(uuid.uuid4())
         response_future = asyncio.Future()
 
-        # Consume response from the Product Service
         await result_queue.consume(lambda message: handle_response(message, response_future, correlation_id, 'list'))
-
-        # Send request to Product Service
         await send_message_to_service(
             channel=channel,
             routing_key='product_details_queue',
@@ -136,13 +120,30 @@ async def fetch_product_details(product_ids: list):
         try:
             product_details = await asyncio.wait_for(response_future, timeout=10)
 
-            # Check if the response is a list (which it should be)
             if isinstance(product_details, list):
-                return product_details  # Return the list of product details
+                return product_details  
             else:
                 logging.error(f"Unexpected response format: {product_details}")
-                return []  # Return an empty list if the format is unexpected
+                return [] 
 
         except asyncio.TimeoutError:
             logging.error(f"Timeout waiting for Product Service response for product IDs {product_ids}")
             raise TimeoutError("Product Service request timed out.")
+        
+
+
+async def process_notification_message(message: aio_pika.IncomingMessage):
+    async with message.process():
+        notification_data = json.loads(message.body)
+        
+        print(f"Sending notification to customer {notification_data['customer_id']}: {notification_data['message']}")
+
+
+async def start_notification_consumer():
+    connection = await aio_pika.connect_robust("amqp://{BROKER_USER}:{BROKER_PASSWORD}@{BROKER_HOST}/")
+    async with connection:
+        channel = await connection.channel()
+        queue = await channel.get_queue('notifications')
+        await queue.consume(process_notification_message)
+        print("Notification consumer started. Waiting for messages...")
+        await asyncio.Future()

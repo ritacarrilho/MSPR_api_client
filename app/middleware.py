@@ -6,10 +6,8 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta
 from jose import JWTError, jwt
 
-# Load environment variables
 load_dotenv()
 
-# Setup the password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -64,7 +62,6 @@ def get_current_customer(token: str = Depends(oauth2_scheme)):
             detail="Invalid authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
     # Print the payload for debugging purposes
     print(f"Decoded token payload: {payload}")
 
